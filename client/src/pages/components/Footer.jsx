@@ -44,16 +44,23 @@ const Footer = () => {
     <footer>
       <div className="footer__container">
         <div className="footer__categories-grid">
-          {categories.map((category, index) => (
-            <Link
-              key={category._id}
-              onClick={scrollTop}
-              to={`/posts/categories/${category.name}`}
-              className={`footer__category-item category-item-${(index % 4) + 1}`}
-            >
-              {category.name}
-            </Link>
-          ))}
+          {categories.map((category, index) => {
+            const name =
+              category.name.length > 15
+                ? category.name.slice(0, 15) + '…'
+                : category.name;
+          
+            return (
+              <Link
+                key={category._id}
+                onClick={scrollTop}
+                to={`/posts/categories/${category.name}`}
+                className={`footer__category-item category-item-${(index % 4) + 1}`}
+              >
+                {name}
+              </Link>
+            );
+          })}
         </div>
 
         <div className="footer__copyright">
