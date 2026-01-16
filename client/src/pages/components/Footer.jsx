@@ -47,7 +47,7 @@ const Footer = () => {
           {categories.map((category, index) => {
             const name =
               category.name.length > 15
-                ? category.name.slice(0, 15) + '…'
+                ? category.name.slice(0, 10) + '…'
                 : category.name;
           
             return (
