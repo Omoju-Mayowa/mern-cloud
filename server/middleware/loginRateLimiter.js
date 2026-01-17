@@ -2,7 +2,7 @@
 import { RateLimiterRedis } from 'rate-limiter-flexible';
 import Redis from 'ioredis';
 
-const redisClient = new Redis(process.env.REDIS_URL || 'redis://127.0.0.1:6379');
+const redisClient = new Redis(process.env.REDIS_URL);
 
 const WHITELIST_IPS = (process.env.WHITELIST_IPS || '127.0.0.1,::1')
   .split(',')
