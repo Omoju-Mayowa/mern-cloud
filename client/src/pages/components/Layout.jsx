@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import Lenis from "lenis";
 import { AnimatePresence, motion } from "motion/react";
 import NavBar from "./NavBar";
+import { Analytics } from "@vercel/analytics/next"
 import Footer from "./Footer";
 import CursorManager from "./CursorManager";
 
@@ -45,7 +46,7 @@ const Layout = () => {
   return (
     <div className="app">
       <CursorManager />
-
+      <Analytics />
       {/* MAIN APP CONTENT */}
       <NavBar />
       <motion.main
