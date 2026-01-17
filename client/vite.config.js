@@ -10,5 +10,13 @@ export default defineConfig({
       'react-dom': 'preact/compat',
       'react/jsx-runtime': 'preact/jsx-runtime'
     }
+  },
+  ssr: {
+    external: ['@vercel/analytics']
+  },
+  build: {
+    rollupOptions: {
+      external: ['@vercel/analytics/next', '@vercel/analytics/react']
+    }
   }
 })

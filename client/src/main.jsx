@@ -1,6 +1,7 @@
 import { render } from 'preact'
 import './index.css'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+import { inject } from '@vercel/analytics'
 import Layout from './pages/components/Layout'
 import ErrorPage from './pages/ErrorPage'
 import Home from './pages/Home'
@@ -55,5 +56,8 @@ const router = createBrowserRouter([
 window.addEventListener('DOMContentLoaded', () => {
   document.body.style.cursor = "url('/cursor1.png'), auto";
 });
+
+// Initialize Vercel Web Analytics
+inject();
 
 render(<RouterProvider router={router} future={{ v7_startTransition: true }} />, document.getElementById('root'))
