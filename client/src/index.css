@@ -26,6 +26,10 @@
   --radius-4: 2rem;
 }
 
+p.error {
+  text-align: center;
+}
+
 .app {
   min-height: 100vh;
   width: 100%;
