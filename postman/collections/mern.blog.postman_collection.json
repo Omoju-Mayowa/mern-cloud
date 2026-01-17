@@ -1,0 +1,348 @@
+{
+  "info": {
+    "_postman_id": "9039defb-44ac-4808-b4e1-c0e7753cf735",
+    "name": "mern.blog",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "6298d7c6-3126-404b-aab3-e61e147b2d45",
+                "exec": [
+                  "// Visualization Script",
+                  "// Visualization Script",
+                  "const template = `",
+                  "  <div style=\"font-family: Arial, sans-serif; margin: 20px;\">",
+                  "    <h3>User Login Details</h3>",
+                  "    <ul style=\"list-style: none; padding: 0;\">",
+                  "      <li><strong>Name:</strong> {{name}}</li>",
+                  "      <li><strong>ID:</strong> {{id}}</li>",
+                  "    </ul>",
+                  "  </div>",
+                  "`;",
+                  "",
+                  "function createPayload() {",
+                  "    const data = pm.response.json();",
+                  "    return {",
+                  "        name: data.name || 'N/A',",
+                  "        id: data.id || 'N/A'",
+                  "    };",
+                  "}",
+                  "",
+                  "pm.visualizer.set(template, createPayload());"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "01b30cfe-9558-4167-a1be-8c8fe0ac7ae3",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-forwarded-for",
+                "value": "192.168.7.213",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "omojumayowa@gmail.com",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "password",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{BASE_URI}}/users/login",
+              "host": [
+                "{{BASE_URI}}"
+              ],
+              "path": [
+                "users",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register User",
+          "id": "d0cdb849-0678-45da-ba98-f47e9e01dee3",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URI}}/users/register",
+              "host": [
+                "{{BASE_URI}}"
+              ],
+              "path": [
+                "users",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User (User Profile)",
+          "id": "4c88129d-e8d0-4f75-a6dc-8f7c3dad5908",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URI}}/users/1009fe",
+              "host": [
+                "{{BASE_URI}}"
+              ],
+              "path": [
+                "users",
+                "1009fe"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Users/Authors",
+          "id": "37e36279-4be1-4f59-a82e-7c68a767ff3f",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URI}}/users/",
+              "host": [
+                "{{BASE_URI}}"
+              ],
+              "path": [
+                "users",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Avatar",
+          "id": "80292e4f-2a09-4972-9697-281356048278",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URI}}/users/change-avatar",
+              "host": [
+                "{{BASE_URI}}"
+              ],
+              "path": [
+                "users",
+                "change-avatar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Edit User",
+          "id": "061eaa09-2e9f-460a-9749-0e68a9fd763c",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URI}}/users/edit-user",
+              "host": [
+                "{{BASE_URI}}"
+              ],
+              "path": [
+                "users",
+                "edit-user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "OTP and Reset Password",
+          "id": "bffd3161-bd5e-424a-a491-be1645044106",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{BASE_URI}}/users/forgot-password",
+              "host": [
+                "{{BASE_URI}}"
+              ],
+              "path": [
+                "users",
+                "forgot-password"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "a4c2e564-34d7-43da-9a3d-b5642696c757"
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "Get Posts",
+          "id": "cc220604-7084-45b4-b75d-bde1fe7baa99",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URI}}/posts/",
+              "host": [
+                "{{BASE_URI}}"
+              ],
+              "path": [
+                "posts",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Category Posts",
+          "id": "550abef0-d7ef-4873-bcba-7f9c14203d66",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URI}}/posts/categories/1",
+              "host": [
+                "{{BASE_URI}}"
+              ],
+              "path": [
+                "posts",
+                "categories",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Post",
+          "id": "9e7d20b3-f825-43ca-8348-e0c4c5e852df",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "id": "902cbe9f-adb9-4916-96a5-8c3249cfa977",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Posts",
+          "id": "470ffb54-1b7f-49df-8c67-0e0947f8f384",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URI}}/posts/user/2",
+              "host": [
+                "{{BASE_URI}}"
+              ],
+              "path": [
+                "posts",
+                "user",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Posts",
+          "id": "56fca26e-e362-4a5d-93ae-6b4c8b5c1bfd",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URI}}/posts/",
+              "host": [
+                "{{BASE_URI}}"
+              ],
+              "path": [
+                "posts",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Edit Post",
+          "id": "75c26384-927b-4225-bfee-ed0f7c3564e5",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URI}}/posts/1",
+              "host": [
+                "{{BASE_URI}}"
+              ],
+              "path": [
+                "posts",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Post",
+          "id": "1a23912d-aae1-4359-ade7-4289354c4673",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URI}}/posts/1",
+              "host": [
+                "{{BASE_URI}}"
+              ],
+              "path": [
+                "posts",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "b114cd74-53a8-49b5-9334-562961add39f"
+    }
+  ]
+}

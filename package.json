@@ -1,0 +1,32 @@
+{
+  "name": "mern",
+  "version": "1.0.1",
+  "private": false,
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\" \"npm run redis \"",
+    "server": "cd server && npm run dev -- --host",
+    "add-pepper": "node server/utils/addPepper.js",
+    "add-pepper:file": "node server/utils/addPepper.js --file",
+    "add-pepper:no-migrate": "node server/utils/addPepper.js --no-migrate",
+    "add-pepper:server": "npm --prefix server run add-pepper --",
+    "add-categories": "node server/utils/addCategories.js",
+    "add-categories:file": "node server/utils/addCategories.js --file",
+    "redis": "redis-server",
+    "client": "cd client && npm run dev -- --host",
+    "client-build": "cd client && npm run build"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^1.6.1",
+    "argon2": "^0.44.0",
+    "lenis": "^1.3.11",
+    "nodemailer": "^7.0.9"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "description": "A small blog project utilizing multiple password hashing and JWT toke for security and authentication, using MERN stack — MongoDB, Express, ReactJS, NodeJS for frontend and backend with a noSQL server. It also features pre-password hashing with SHA-256, hashing the prehashed password with argon, capturing IP Adresses, Limiting rates and temporarily blacklisting flagged IP Addresses, uses Secret Password Peppers and Features Password Pepper Rotation with monthly rehashing and also sends mails. The project can run offline and offline or one a server set depending on the state of both servers. It uses concurrently to run 3 servers at once and it light and fast. It allows posting with categories, thumbnails, description, title, and a variety of other features, It has a page for all authors and can also check posts based on their userId, categoryID and postID. It is still an experimental project with constant updates being added.",
+  "main": "index.js",
+  "repository": "https://github.com/Omoju-Mayowa/mern",
+  "author": "Nox",
+  "license": "none"
+}

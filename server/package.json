@@ -1,0 +1,41 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "add-pepper": "node utils/addPepper.js",
+    "add-pepper:file": "node utils/addPepper.js --file",
+    "add-pepper:no-migrate": "node utils/addPepper.js --no-migrate",
+    "add-pepper:help": "node utils/addPepper.js",
+    "add-categories": "node utils/addCategories.js",
+    "add-categories:file": "node utils/addCategories.js --file"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "argon2": "^0.44.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "etag": "^1.8.1",
+    "express": "^4.21.1",
+    "express-fileupload": "^1.5.2",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.8.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.20.0",
+    "mongoose": "^8.7.1",
+    "node-cron": "^4.2.1",
+    "rate-limiter-flexible": "^8.0.1",
+    "send": "^1.2.0",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "description": ""
+}

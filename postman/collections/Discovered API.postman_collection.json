@@ -1,0 +1,591 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+    "name": "Discovered API",
+    "description": "Auto-discovered API endpoints from the MERN Blog backend server. This collection contains all HTTP endpoints found in the Express.js routes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "users",
+      "item": [
+        {
+          "name": "Register User",
+          "id": "f57dd24e-22d5-4318-885c-11ff82850d53",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"name\": \"\",\n\t\"email\": \"\",\n\t\"password\": \"\",\n\t\"password2\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "register"
+              ]
+            },
+            "description": "Register a new user account. Requires name, email, password, and password confirmation."
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "id": "7e74c006-e922-4456-b429-ee2bde5145f5",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"email\": \"\",\n\t\"password\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "login"
+              ]
+            },
+            "description": "Authenticate a registered user. Returns JWT token on success."
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "id": "526af45a-794b-4b4c-bafe-94e76120986a",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "id": "bf39dea8-ad63-4301-b2c9-09b16d64d7ca",
+                  "key": "id",
+                  "value": "",
+                  "description": "User ID"
+                }
+              ]
+            },
+            "description": "Get user profile by user ID. Returns user data excluding password."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Authors",
+          "id": "a2c1da84-2074-406a-8b91-e943008b8a0e",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                ""
+              ]
+            },
+            "description": "Get list of all authors/users."
+          },
+          "response": []
+        },
+        {
+          "name": "Send Reset OTP (Forgot Password)",
+          "id": "9056ab16-5e20-475e-9cfa-9d40bd18e4dd",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"email\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/forgot-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "forgot-password"
+              ]
+            },
+            "description": "Send OTP to user's email for password reset."
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Password",
+          "id": "8988f9a2-54af-491d-9970-723470e0da88",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"otp\": \"\",\n\t\"newPassword\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "reset-password"
+              ]
+            },
+            "description": "Reset password using OTP. Returns JWT token on success."
+          },
+          "response": []
+        },
+        {
+          "name": "Change Avatar",
+          "id": "a44a2adf-5e94-4727-9b51-6b65603e84ef",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "JWT token required"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "description": "Avatar image file (max 10MB)",
+                  "value": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/change-avatar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "change-avatar"
+              ]
+            },
+            "description": "Upload or change user avatar. Protected route - requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Edit User",
+          "id": "847d706d-734e-411c-8311-0ad1257c4283",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "JWT token required"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"name\": \"\",\n\t\"email\": \"\",\n\t\"about\": \"\",\n\t\"currentPassword\": \"\",\n\t\"newPassword\": \"\",\n\t\"confirmNewPassword\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/edit-user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "edit-user"
+              ]
+            },
+            "description": "Edit user profile details. Protected route - requires authentication and current password."
+          },
+          "response": []
+        }
+      ],
+      "id": "07746939-4dc8-4887-a658-b8fbdcb46fdf",
+      "description": "User management endpoints including authentication, profile, and avatar operations"
+    },
+    {
+      "name": "posts",
+      "item": [
+        {
+          "name": "Create Post",
+          "id": "41001360-dc3e-4e73-86a2-3638ccd4a816",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "JWT token required"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "",
+                  "type": "text",
+                  "description": "Post title"
+                },
+                {
+                  "key": "category",
+                  "value": "",
+                  "type": "text",
+                  "description": "Post category"
+                },
+                {
+                  "key": "description",
+                  "value": "",
+                  "type": "text",
+                  "description": "Post content/description"
+                },
+                {
+                  "key": "thumbnail",
+                  "type": "file",
+                  "description": "Post thumbnail image (max 1GB)",
+                  "value": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                ""
+              ]
+            },
+            "description": "Create a new blog post. Protected route - requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Posts",
+          "id": "d871bb4c-99f4-45a6-900d-c52a6c181ff1",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                ""
+              ]
+            },
+            "description": "Get all blog posts sorted by most recently updated."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Post by ID",
+          "id": "78b505a4-4bca-402d-84da-38e89c5285f9",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "id": "ccf0abe1-b6d3-4be3-a6f3-9c048a93a110",
+                  "key": "id",
+                  "value": "",
+                  "description": "Post ID"
+                }
+              ]
+            },
+            "description": "Get a single blog post by its ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts by Category",
+          "id": "8c27f20f-80c3-42a2-8c99-6dc1c8e60d11",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/categories/:category",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "categories",
+                ":category"
+              ],
+              "variable": [
+                {
+                  "id": "9da59811-f97e-4f0a-b50b-ba7afc9e6206",
+                  "key": "category",
+                  "value": "",
+                  "description": "Category name"
+                }
+              ]
+            },
+            "description": "Get all posts filtered by category, sorted by creation date."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts by User",
+          "id": "7b84e86b-c49b-47d3-9de2-f750d5f17ce9",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "id": "22365696-c351-4eef-be2b-5c305d699493",
+                  "key": "id",
+                  "value": "",
+                  "description": "User/Author ID"
+                }
+              ]
+            },
+            "description": "Get all posts by a specific user/author, sorted by creation date."
+          },
+          "response": []
+        },
+        {
+          "name": "Edit Post",
+          "id": "80917a70-89bf-480f-9f63-7fd6b0056b13",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "JWT token required"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "",
+                  "type": "text",
+                  "description": "Post title"
+                },
+                {
+                  "key": "category",
+                  "value": "",
+                  "type": "text",
+                  "description": "Post category"
+                },
+                {
+                  "key": "description",
+                  "value": "",
+                  "type": "text",
+                  "description": "Post content/description"
+                },
+                {
+                  "key": "thumbnail",
+                  "type": "file",
+                  "description": "New thumbnail image (optional)",
+                  "value": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "id": "9f77677a-9eb3-462d-aeed-2b970dc2364f",
+                  "key": "id",
+                  "value": "",
+                  "description": "Post ID"
+                }
+              ]
+            },
+            "description": "Edit an existing blog post. Protected route - requires authentication and post ownership."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Post",
+          "id": "7e32be10-d884-43c6-a051-220d39a67e98",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "JWT token required"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "id": "7c0bf5ce-0d89-47ac-a999-89bcc1f36080",
+                  "key": "id",
+                  "value": "",
+                  "description": "Post ID"
+                }
+              ]
+            },
+            "description": "Delete a blog post. Protected route - requires authentication and post ownership."
+          },
+          "response": []
+        }
+      ],
+      "id": "894ea96b-7896-483e-905d-6e52d2a2496d",
+      "description": "Blog post management endpoints including CRUD operations and filtering"
+    }
+  ],
+  "variable": [
+    {
+      "id": "e5a24997-3d2c-454e-9fcb-730f5a6d511e",
+      "key": "baseUrl",
+      "value": "http://localhost:5001",
+      "type": "string"
+    },
+    {
+      "id": "7962a1c0-764a-4a83-8dce-88ee56b2667a",
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
