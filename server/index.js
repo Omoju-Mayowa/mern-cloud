@@ -22,7 +22,12 @@ const app = express();
 app.use(express.json({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
 
-const allowedOrigins = [process.env.SITE_URL];
+const allowedOrigins = [
+  process.env.SITE_URL,
+  'https://mern-cloud.vercel.app/',
+  'https://mern-cloud-git-main-omoju-mayowas-projects.vercel.app/',
+  'https://mern-cloud-fyqsicu8g-omoju-mayowas-projects.vercel.app/'
+];
 
 app.use(cors({
   origin: (origin, callback) => {
