@@ -284,7 +284,7 @@ footer {
   border-radius: var(--radius-2);
   transition: var(--transition);
   text-align: center;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   text-decoration: none;
