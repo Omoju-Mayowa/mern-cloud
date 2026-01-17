@@ -22,7 +22,7 @@ const app = express();
 app.use(express.json({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
 
-const allowedOrigins = [process.env.CLIENT_URL || 'http://localhost:5173', 'http://localhost:5174'];
+const allowedOrigins = [process.env.SITE_URL];
 
 app.use(cors({
   origin: (origin, callback) => {
