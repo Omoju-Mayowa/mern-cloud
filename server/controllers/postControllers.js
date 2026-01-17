@@ -146,11 +146,11 @@ const getPosts = async (req, res, next) => {
 const getPost = async (req, res, next) => {
     try {
         const postId = req.params.id
-        const post = await Post.findById(postId)
-
         if(!mongoose.Types.ObjectId.isValid(postId)) {
             return next(new HttpError('Invalid Post ID.', 404))
         }
+
+        const post = await Post.findById(postId)
 
         if(!post) {
             return next(new HttpError('Post not found'), 404)
@@ -198,6 +198,10 @@ const editPost = async (req, res, next) => {
         // by default react quill has paragraph openong and closing tag with a break tag in between, so it has 11 characters by default
         if(!title || !category || !description || description.length < 11) {
             return next(new HttpError("Fill in all Fields", 422))
+        }
+
+        if(!mongoose.Types.ObjectId.isValid(postId)) {
+            return next(new HttpError('Invalid Post ID.', 404))
         }
 
         // grab old post from db
@@ -292,6 +296,10 @@ const deletePost = async (req, res, next) => {
         }
         const post = await Post.findById(postId)
         
+        if(!mongoose.Types.ObjectId.isValid(postId)) {
+            return next(new HttpError('Invalid Post ID.', 404))
+        }
+
         // Add this check
         if(!post) {
             return next(new HttpError('Post not found.', 404))
@@ -361,6 +369,11 @@ const likePost = async (req, res, next) => {
         const userId = req.user.id
 
         const post = await Post.findById(postId)
+
+        if(!mongoose.Types.ObjectId.isValid(postId)) {
+            return next(new HttpError('Invalid Post ID.', 404))
+        }
+
         if (!post) {
             return next(new HttpError('Post not found', 404))
         }
