@@ -1,6 +1,10 @@
 import { render } from 'preact'
 import './index.css'
+import { injectSpeedInsights } from '@vercel/speed-insights'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+
+// Initialize Vercel Speed Insights
+injectSpeedInsights()
 import Layout from './pages/components/Layout'
 import ErrorPage from './pages/ErrorPage'
 import Home from './pages/Home'
