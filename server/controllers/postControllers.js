@@ -7,6 +7,7 @@ import { v4 as uuid } from 'uuid'
 
 import { HttpError } from '../models/errorModel.js'
 import __dirname from '../utils/directory.js'
+import mongoose from 'mongoose'
 
 // Thumbnail Size Variables
 const thumbnailSizeBytes = 1073741824; // Currently 1GB
@@ -146,6 +147,11 @@ const getPost = async (req, res, next) => {
     try {
         const postId = req.params.id
         const post = await Post.findById(postId)
+
+        if(!mongoose.Types.ObjectId.isValid(postId)) {
+            return next(new HttpError('Invalid Post ID.', 404))
+        }
+
         if(!post) {
             return next(new HttpError('Post not found'), 404)
         }
