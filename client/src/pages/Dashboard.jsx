@@ -3,6 +3,7 @@ import  { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { UserContext } from './components/context/userContext'
 import usePostStream from './components/usePostStream'
+import Loader from './components/Loader'
 
 
 const scrollTop = () => {
@@ -67,9 +68,7 @@ const Dashboard = () => {
   if (loading) {
     return (
       <section className="dashboard">
-        <div className="center">
-          <p>Loading your posts...</p>
-        </div>
+        <Loader />
       </section>
     )
   }
