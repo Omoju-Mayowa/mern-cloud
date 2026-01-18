@@ -1,5 +1,4 @@
 // backend/controllers/postControllers.js
-
 import Post from '../models/postModel.js';
 import User from '../models/userModel.js';
 import { v4 as uuid } from 'uuid';
@@ -9,97 +8,72 @@ import s3 from '../utils/r2Client.js';
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { HttpError } from '../models/errorModel.js';
 
-// Thumbnail and video max sizes
-const thumbnailSizeBytes = 1073741824; // 1GB
-const thumbnailSizeMb = (thumbnailSizeBytes / (1024 * 1024)).toFixed(2) + 'MB';
-const videoSizeBytes = 5368709120; // 5GB
-const videoSizeMb = (videoSizeBytes / (1024 * 1024)).toFixed(2) + 'MB';
+const thumbnailSizeBytes = 1073741824; 
+const videoSizeBytes = 5368709120; 
 
-// ==================== SSE Setup ====================
 const sseClients = new Set();
-
 const sendSSE = (event, payload) => {
     const data = JSON.stringify({ event, payload });
     sseClients.forEach(client => {
-        try {
-            client.write(`data: ${data}\n\n`);
-        } catch (err) {
-            console.error('Error sending SSE:', err);
-            sseClients.delete(client);
-        }
+        try { client.write(`data: ${data}\n\n`); } catch (err) { sseClients.delete(client); }
     });
 };
 
-// ==================== Upload file to Cloudflare R2 ====================
-const uploadToR2 = async (fileBuffer, filename, folder = "mern") => {
-    const key = `${folder}/${filename}`;
+// ==================== FIXED UPLOAD LOGIC ====================
+const uploadToR2 = async (file, folder = "mern") => {
+    const ext = path.extname(file.name);
+    const fileName = `${uuid()}${ext}`;
+    const key = `${folder}/${fileName}`;
+    
     const command = new PutObjectCommand({
         Bucket: process.env.CLOUDFLARE_R2_BUCKET,
         Key: key,
-        Body: fileBuffer,
-        ContentType: "application/octet-stream",
-        ACL: 'public-read'
+        Body: file.data,
+        // Detect content type so browser displays it correctly
+        ContentType: file.mimetype || "application/octet-stream",
     });
+
     await s3.send(command);
-    return key; // only store key/filename in DB
+
+    // Return the FULL PUBLIC URL to be saved in MongoDB
+    // Ensure CLOUDFLARE_R2_ASSETS_URL is your pub-xxx.r2.dev link
+    return `${process.env.CLOUDFLARE_R2_ASSETS_URL}/${key}`;
 };
 
-// ==================== CREATE POST ====================
-const createPost = async (req, res, next) => {
+export const createPost = async (req, res, next) => {
     try {
         const { title, category, description } = req.body;
-        if (!title || !category || !description) {
-            return next(new HttpError("Fill in all fields", 422));
-        }
+        if (!title || !category || !description) return next(new HttpError("Fill in all fields", 422));
+        if (!req.files || (!req.files.thumbnail && !req.files.video)) return next(new HttpError("Provide media", 422));
 
-        if (!req.files || (!req.files.thumbnail && !req.files.video)) {
-            return next(new HttpError("Provide either a thumbnail/image or a video", 422));
-        }
-
-        const { thumbnail, video } = req.files || {};
-        let thumbnailKey = null;
-        let videoKey = null;
+        const { thumbnail, video } = req.files;
+        let thumbnailPath = null;
+        let videoPath = null;
 
         if (thumbnail) {
-            if (thumbnail.size > thumbnailSizeBytes) {
-                return next(new HttpError(`Thumbnail too big. Max ${thumbnailSizeMb}`, 413));
-            }
-            const ext = path.extname(thumbnail.name);
-            const newFileName = `thumbnail-${uuid()}${ext}`;
-            thumbnailKey = await uploadToR2(thumbnail.data, newFileName);
+            if (thumbnail.size > thumbnailSizeBytes) return next(new HttpError("Thumbnail too big", 413));
+            thumbnailPath = await uploadToR2(thumbnail, "mern");
         }
 
         if (video) {
-            if (video.size > videoSizeBytes) {
-                return next(new HttpError(`Video too big. Max ${videoSizeMb}`, 413));
-            }
-            const ext = path.extname(video.name);
-            const newVideoName = `video-${uuid()}${ext}`;
-            videoKey = await uploadToR2(video.data, newVideoName);
+            if (video.size > videoSizeBytes) return next(new HttpError("Video too big", 413));
+            videoPath = await uploadToR2(video, "mern");
         }
 
-        const postData = {
-            title,
-            category,
-            description,
-            thumbnail: thumbnailKey,
-            videoUrl: videoKey,
+        const newPost = await Post.create({
+            title, category, description,
+            thumbnail: thumbnailPath,
+            videoUrl: videoPath,
             creator: req.user.id
-        };
-
-        const newPost = await Post.create(postData);
-        if (!newPost) return next(new HttpError("Post couldn't be created", 422));
+        });
 
         const currentUser = await User.findById(req.user.id);
         await User.findByIdAndUpdate(req.user.id, { posts: (currentUser.posts || 0) + 1 });
-        const updatedUser = await User.findById(req.user.id).select('-password');
-
+        
         sendSSE('post_created', newPost);
-        sendSSE('profile_updated', updatedUser.toObject());
-
         res.status(200).json(newPost);
     } catch (error) {
-        return next(new HttpError(error.message || error, 500));
+        return next(new HttpError(error.message, 500));
     }
 };
 
