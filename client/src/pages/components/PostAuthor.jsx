@@ -4,76 +4,68 @@ import axios from 'axios';
 import ReactTimeAgo from 'react-time-ago'
 import TimeAgo from 'javascript-time-ago'
 import usePostStream from './usePostStream'
-
 import en from 'javascript-time-ago/locale/en.json'
-TimeAgo.addDefaultLocale(en)
 
-const scrollTop = () => {
-  window.scrollTo(0, 0);
+// Only add locale once
+if (TimeAgo.getLocales().length === 0) {
+  TimeAgo.addDefaultLocale(en)
 }
 
+const scrollTop = () => window.scrollTo(0, 0);
+
 const PostAuthor = ({ authorID, createdAt }) => {
-  const [author, setAuthor] = useState({})
+  const [author, setAuthor] = useState({ name: '', avatar: '' });
 
   useEffect(() => {
     const getAuthor = async () => {
-      if (!authorID) return setAuthor({ name: 'Unknown', avatar: 'default-avatar.png' })
+      if (!authorID) return;
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/${authorID}`)
-        setAuthor(response?.data)
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/${authorID}`);
+        setAuthor(response?.data);
       } catch (error) {
-        console.error('Failed to fetch author:', error);
-        setAuthor({ name: 'Unknown', avatar: 'default-avatar.png' })
+        console.error('Failed to fetch author:', error.message);
+        setAuthor({ name: 'Unknown', avatar: 'default-avatar.png' });
       }
     }
-    getAuthor()
-  }, [authorID])
+    getAuthor();
+  }, [authorID]);
 
+  // Handle real-time profile updates
   usePostStream((event, payload) => {
     if (event === 'profile_updated' && String(payload._id) === String(authorID)) {
-      setAuthor(payload)
+      setAuthor(payload);
     }
-  })
+  });
 
-  // ==================== FIXED URL LOGIC ====================
+  // RESOLVE AVATAR URL
+  const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
+  
   const getAvatarUrl = () => {
-    const safeAvatar = author?.avatar;
-    
-    if (!safeAvatar || safeAvatar === 'default-avatar.png') {
-       // Fallback to a hardcoded default if nothing exists
-       return `https://your-public-r2-link.dev/avatars/default-avatar.png`; 
+    const avatar = author?.avatar;
+    if (!avatar || avatar === 'default-avatar.png') {
+       return `${assetsBase}/avatars/default-avatar.png`;
     }
-
-    // If it's already a full Cloudflare URL, return it directly
-    if (typeof safeAvatar === 'string' && safeAvatar.startsWith('http')) {
-      return safeAvatar;
-    }
-
-    // Fallback for old database entries that only have the filename
-    const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
-    return `${assetsBase}/avatars/${safeAvatar}`;
-  }
+    // If full URL is saved in DB, use it. Otherwise, look in 'avatars' folder
+    return avatar.startsWith('http') ? avatar : `${assetsBase}/avatars/${avatar}`;
+  };
 
   return (
     <Link onClick={scrollTop} to={`/profile/${authorID}`} className='post__author'>
-        <div className="post__author-avatar">
-            <img 
-              src={getAvatarUrl()} 
-              alt={author?.name} 
-              onError={(e) => { 
-                e.target.onerror = null; 
-                e.target.src = 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev/avatars/default-avatar.png'; 
-              }} 
-            />
-        </div>
-        <div className="post__author-details">
-            <h5>By: {author?.name || 'Unknown'}</h5>
-            <small>
-              {createdAt ? <ReactTimeAgo date={new Date(createdAt)} locale='en-US' /> : 'Just now'}
-            </small>
-        </div>
+      <div className="post__author-avatar">
+        <img 
+          src={getAvatarUrl()} 
+          alt={author?.name} 
+          onError={(e) => { e.target.src = `${assetsBase}/avatars/default-avatar.png` }} 
+        />
+      </div>
+      <div className="post__author-details">
+        <h5>By: {author?.name || 'Anonymous'}</h5>
+        <small>
+          {createdAt ? <ReactTimeAgo date={new Date(createdAt)} locale='en-US' /> : 'Just now'}
+        </small>
+      </div>
     </Link>
   )
 }
 
-export default PostAuthor
+export default PostAuthor;
