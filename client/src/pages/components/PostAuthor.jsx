@@ -6,9 +6,11 @@ import TimeAgo from 'javascript-time-ago'
 import usePostStream from './usePostStream'
 import en from 'javascript-time-ago/locale/en.json'
 
-// Only add locale once
-if (TimeAgo.getLocales().length === 0) {
-  TimeAgo.addDefaultLocale(en)
+// SAFEST INITIALIZATION:
+try {
+  TimeAgo.addDefaultLocale(en);
+} catch (error) {
+  // If it's already added, this prevents the "Locale already added" crash
 }
 
 const scrollTop = () => window.scrollTo(0, 0);
