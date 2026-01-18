@@ -46,15 +46,15 @@ const PostAuthor = ({authorID, createdAt}) => {
     }
   })
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
+  const baseUrl = import.meta.env.VITE_API_ASSETS_URL || ''
   const assetsBase = baseUrl.replace('/api', '') || baseUrl
   const safeAvatar = author?.avatar || 'avatar-default.png'
-  const avatarUrl = safeAvatar && (safeAvatar.startsWith && (safeAvatar.startsWith('http://') || safeAvatar.startsWith('https://'))) ? safeAvatar : `${assetsBase}/uploads/${safeAvatar}`
+  const avatarUrl = safeAvatar && (safeAvatar.startsWith && (safeAvatar.startsWith('http://') || safeAvatar.startsWith('https://'))) ? safeAvatar : `${assetsBase}/mern/${safeAvatar}`
 
   return (
     <Link onClick={scrollTop} to={`/profile/${authorID}`} className='post__author'>
         <div className="post__author-avatar">
-            <img src={avatarUrl} alt="" onError={(e) => { e.target.src = `${assetsBase}/uploads/avatar-default.png` }} />
+            <img src={avatarUrl} alt="" onError={(e) => { e.target.src = `${assetsBase}/mern/avatar-default.png` }} />
         </div>
         <div className="post__author-details">
             <h5>By: {author?.name}</h5>
