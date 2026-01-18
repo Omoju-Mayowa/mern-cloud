@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 // Simple SSE hook that connects to the server stream and calls `onMessage` with parsed payload
 export default function usePostStream(onMessage) {
   useEffect(() => {
-    const url = `${import.meta.env.VITE_API_BASE_URL}/posts/stream`
+    const url = `${import.meta.env.VITE_API_ASSETS_URL}/posts/stream`
     const es = new EventSource(url)
 
     es.onmessage = (e) => {
