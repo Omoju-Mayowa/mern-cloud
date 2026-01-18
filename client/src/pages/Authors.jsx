@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import usePostStream from './components/usePostStream'
+import Loader from './components/Loader'
 
 const scrollTop = () => {
   window.scrollTo(0, 0);
@@ -60,9 +61,7 @@ const Authors = () => {
     return (
       <section className="authors">
         <h1 className='container h1__center'>Our Authors</h1>
-        <div className="center">
-          <p>Loading authors...</p>
-        </div>
+        <Loader size='small' />
       </section>
     )
   }
