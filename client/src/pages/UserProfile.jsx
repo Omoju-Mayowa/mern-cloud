@@ -78,6 +78,7 @@ const UserProfile = () => {
             )}
           </div>
           <h1>{userData?.name}</h1>
+          <br />
           {isEditing ? (
             <form className="form profile__form" onSubmit={handleSave}>
               <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
