@@ -34,11 +34,11 @@ const Dashboard = () => {
             <div className="dashboard__post-info">
               <div className="dashboard__post-thumbnail">
                 <img 
-                  src={post.thumbnail ? (post.thumbnail.startsWith('http') ? post.thumbnail : `${assetsBase}/mern/${post.thumbnail}`) : `${assetsBase}/mern/post-placeholder.png`} 
-                  alt="" 
-                  onError={e => e.target.src = `${assetsBase}/mern/post-placeholder.png`}
+                  src={post.thumbnail ? (post.thumbnail.startsWith('http') ? post.thumbnail : `${assetsBase}/mern/${post.thumbnail.replace('mern/', '')}`) : `${assetsBase}/mern/post-placeholder.png`} 
+                  alt={post.title} 
+                  onError={(e) => e.target.src = `${assetsBase}/mern/post-placeholder.png`}
                 />
-              </div>
+              </div>       
               <h5>{post.title}</h5>
             </div>
             <div className="dashboard__post-actions">
