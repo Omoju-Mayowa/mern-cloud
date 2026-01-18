@@ -18,7 +18,7 @@ router.post('/', async (req, res) => {
 
     // Generate a unique filename
     const ext = path.extname(file.name);
-    const key = `mern/${crypto.randomUUID()}${ext}`; // put files under /mern folder
+    const key = `mern/${crypto.randomUUID()}${ext}`; // organize files under /mern
 
     // Upload to R2
     const command = new PutObjectCommand({
@@ -26,13 +26,15 @@ router.post('/', async (req, res) => {
       Key: key,
       Body: file.data,
       ContentType: file.mimetype,
-      ACL: 'public-read', // optional, makes file publicly accessible
+      ACL: 'public-read', // optional, allows public access
     });
 
     await s3.send(command);
 
-    // Public URL
-    const fileUrl = `${process.env.CLOUDFLARE_R2_ENDPOINT}/${key}`;
+    // Public URL for frontend should use CLOUDFLARE_R2_ASSETS_URL
+    // Example: https://<your-bucket>.r2.cloudflarestorage.com/mern/<file>
+    const fileUrl = `${process.env.CLOUDFLARE_R2_ASSETS_URL}/${key}`;
+
     res.status(200).json({ url: fileUrl });
   } catch (err) {
     console.error('Upload failed:', err);
