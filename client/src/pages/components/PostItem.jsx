@@ -6,16 +6,12 @@ import MediaDisplay from './MediaDisplay'
 
 const scrollTop = () => { window.scrollTo(0, 0); }
 
-// Helper to prevent mern/mern/ double nesting
 const resolveMediaUrl = (path, folder = 'mern') => {
   if (!path) return `${import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev'}/${folder}/post-placeholder.png`;
   if (path.startsWith('http')) return path;
-
   const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
-
-  if (path.startsWith(`${folder}/`)) {
-    return `${assetsBase}/${path}`;
-  }
+  
+  if (path.startsWith(`${folder}/`)) return `${assetsBase}/${path}`;
   return `${assetsBase}/${folder}/${path}`;
 };
 
@@ -23,24 +19,28 @@ const PostItem = ({ postID, category, title, description, authorID, thumbnail, v
   const finalThumbnail = resolveMediaUrl(thumbnail);
   const finalVideo = resolveMediaUrl(videoUrl);
 
-  const stripHtml = (html) => html?.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim() || '';
-  const shortDescription = stripHtml(description).length > 145 ? stripHtml(description).substr(0, 145) + '...' : stripHtml(description);
-
-  // Function to play video on hover
   const handleMouseEnter = (e) => {
     const video = e.currentTarget.querySelector('video');
     if (video) {
-      video.play().catch(err => console.error("Playback failed:", err));
+      // We force muted to false here so sound plays
+      video.muted = false; 
+      video.play().catch(err => {
+        // If the user hasn't clicked anywhere yet, this error will show in console
+        console.warn("Autoplay with audio requires a user click on the page first.", err);
+      });
     }
   };
 
-  // Function to pause and reset video on leave
   const handleMouseLeave = (e) => {
     const video = e.currentTarget.querySelector('video');
     if (video) {
       video.pause();
+      video.currentTime = 0; // Resets video when mouse leaves
     }
   };
+
+  const stripHtml = (html) => html?.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim() || '';
+  const shortDescription = stripHtml(description).length > 145 ? stripHtml(description).substr(0, 145) + '...' : stripHtml(description);
 
   return (
     <article className="post">
@@ -52,12 +52,11 @@ const PostItem = ({ postID, category, title, description, authorID, thumbnail, v
         {finalVideo && videoUrl ? (
           <MediaDisplay 
             type="video" 
-            controls={false} // Set to boolean false to ensure no controls show
-            muted={true}    // Required for autoplay/hover-play in browsers
-            loop={true}     // Optional: makes the video loop while hovering
+            controls={false} 
+            muted={false} // Sound is ON
             src={finalVideo} 
-            alt={title} 
             poster={finalThumbnail} 
+            alt={title} 
           />
         ) : (
           <MediaDisplay type="image" src={finalThumbnail} alt={title} />
