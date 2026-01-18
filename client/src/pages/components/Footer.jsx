@@ -17,7 +17,7 @@ const Footer = () => {
         // Ensure response.data is an array
         const categoriesData = Array.isArray(response.data) ? response.data : []
         // Get up to 20 random categories
-        const shuffled = categoriesData.sort(() => 0.5 - Math.random()).slice(0, 20)
+        const shuffled = categoriesData.sort(() => 0.5 - Math.random()).slice(0, 5)
         setCategories(shuffled)
       } catch (error) {
         console.error('Error fetching categories:', error)
