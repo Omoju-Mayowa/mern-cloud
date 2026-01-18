@@ -53,7 +53,7 @@ const Dashboard = () => {
                   <img 
                     src={post.thumbnail?.startsWith('http') ? post.thumbnail : `${assetsBase}/mern/${post.thumbnail}`} 
                     alt={post.title} 
-                    onError={(e) => e.target.src = `${assetsBase}/mern/default-avatar.png`}
+                    onError={(e) => e.target.src = `${assetsBase}/mern/post-placeholder.png`} 
                   />
                 </div>
                 <h5>{post.title.length > 60 ? post.title.substr(0, 60) + '...' : post.title}</h5>
