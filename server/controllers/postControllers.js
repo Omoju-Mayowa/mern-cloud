@@ -20,23 +20,20 @@ const sendSSE = (event, payload) => {
 };
 
 // ==================== FIXED UPLOAD LOGIC ====================
-const uploadToR2 = async (file, folder = "mern") => {
-    const ext = path.extname(file.name);
-    const fileName = `${uuid()}${ext}`;
-    const key = `${folder}/${fileName}`;
-    
+// backend/controllers/postControllers.js
+
+const uploadToR2 = async (fileBuffer, filename, folder = "mern") => {
+    const key = `${folder}/${filename}`; // Result: "mern/filename.jpg"
     const command = new PutObjectCommand({
         Bucket: process.env.CLOUDFLARE_R2_BUCKET,
         Key: key,
-        Body: file.data,
-        // Detect content type so browser displays it correctly
-        ContentType: file.mimetype || "application/octet-stream",
+        Body: fileBuffer,
+        ContentType: "image/jpeg", // Change based on file type if possible
     });
-
     await s3.send(command);
 
-    // Return the FULL PUBLIC URL to be saved in MongoDB
-    // Ensure CLOUDFLARE_R2_ASSETS_URL is your pub-xxx.r2.dev link
+    // Return the FULL URL
+    // Result: https://pub-xxx.r2.dev/mern/filename.jpg
     return `${process.env.CLOUDFLARE_R2_ASSETS_URL}/${key}`;
 };
 
