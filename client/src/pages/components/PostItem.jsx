@@ -78,7 +78,7 @@ const PostItem = ({postID, category, title, description, authorID, thumbnail, vi
         <span>
           <LikeButton postID={postID} initialLikesCount={likesCount} initialLikedBy={likedBy} />
           <Link className='btn category' onClick={scrollTop} to={`/posts/categories/${category}`}>
-            {category && category.length > 8 ? category.substring(0, 8) + '...' : category}
+            {category && category.length > 12 ? category.substring(0, 12) + '...' : category}
           </Link>
         </span>
       </div>
