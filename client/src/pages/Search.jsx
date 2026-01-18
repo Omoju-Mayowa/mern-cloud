@@ -263,7 +263,7 @@ const Search = () => {
                                             <span>
                                                 <LikeButton postID={post._id} initialLikesCount={post.likesCount} initialLikedBy={post.likedBy} />
                                                 <Link className='btn category' to={`/posts/categories/${post.category}`} onClick={scrollTop}>
-                                                  {post.category && post.category.length > 10 ? post.category.substring(0, 10) + '...' : post.category}
+                                                  {post.category && post.category.length > 12 ? post.category.substring(0, 12) + '...' : post.category}
                                                 </Link>
                                             </span>
                                         </div>
