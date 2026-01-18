@@ -23,7 +23,7 @@ const PostAuthor = ({authorID, createdAt}) => {
     const getAuthor = async () => {
       if (!authorID) return setAuthor({ name: 'Unknown', avatar: 'default-avatar.png' })
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/${authorID}`)
+        const response = await axios.get(`${import.meta.env.VITE_API_ASSETS_URL}/users/${authorID}`)
         setAuthor(response?.data)
       } catch (error) {
         // handle missing author gracefully and surface errors for debugging
