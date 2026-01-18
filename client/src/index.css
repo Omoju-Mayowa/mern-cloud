@@ -274,7 +274,6 @@ footer {
 .footer__categories-grid {
   gap: 1.5rem;
   display: flex;
-  max-width: 1000px;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.4rem;
