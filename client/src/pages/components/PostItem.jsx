@@ -1,35 +1,56 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import PostAuthor from './PostAuthor'
+import LikeButton from './LikeButton'
 import MediaDisplay from './MediaDisplay'
 
-const PostItem = ({ postID, category, title, description, thumbnail, videoUrl, authorID, createdAt }) => {
+const scrollTop = () => { window.scrollTo(0, 0); }
+
+// Helper to prevent mern/mern/ double nesting
+const resolveMediaUrl = (path, folder = 'mern') => {
+  if (!path) return `${import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev'}/${folder}/post-placeholder.png`;
+  if (path.startsWith('http')) return path;
+
   const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
-  
-  const finalThumbnail = thumbnail ? (thumbnail.startsWith('http') ? thumbnail : `${assetsBase}/mern/${thumbnail}`) : `${assetsBase}/mern/post-placeholder.png`;
-  const finalVideo = videoUrl ? (videoUrl.startsWith('http') ? videoUrl : `${assetsBase}/mern/${videoUrl}`) : null;
+
+  // If path already includes 'mern/', don't add it again
+  if (path.startsWith(`${folder}/`)) {
+    return `${assetsBase}/${path}`;
+  }
+  return `${assetsBase}/${folder}/${path}`;
+};
+
+const PostItem = ({ postID, category, title, description, authorID, thumbnail, videoUrl, createdAt, likesCount = 0, likedBy = [] }) => {
+  const finalThumbnail = resolveMediaUrl(thumbnail);
+  const finalVideo = resolveMediaUrl(videoUrl);
+
+  const stripHtml = (html) => html?.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim() || '';
+  const shortDescription = stripHtml(description).length > 145 ? stripHtml(description).substr(0, 145) + '...' : stripHtml(description);
 
   return (
     <article className="post">
       <div className="post__thumbnail">
-        {finalVideo ? (
-          <video src={finalVideo} poster={finalThumbnail} muted onMouseOver={e => e.target.play()} onMouseOut={e => e.target.pause()} />
+        {finalVideo && videoUrl ? (
+          <MediaDisplay type="video" src={finalVideo} alt={title} poster={finalThumbnail} />
         ) : (
-          <img src={finalThumbnail} alt={title} />
+          <MediaDisplay type="image" src={finalThumbnail} alt={title} />
         )}
       </div>
       <div className="post__content">
-        <Link to={`/posts/${postID}`}>
+        <Link to={`/posts/${postID}`} onClick={scrollTop}>
           <h3>{title}</h3>
-          <p dangerouslySetInnerHTML={{__html: description.substr(0, 150) + '...'}}></p>
+          <p>{shortDescription}</p>
         </Link>
         <div className="post__footer">
           <PostAuthor authorID={authorID} createdAt={createdAt} />
-          <Link to={`/posts/categories/${category}`} className='btn category'>{category}</Link>
+          <span>
+            <LikeButton postID={postID} initialLikesCount={likesCount} initialLikedBy={likedBy} />
+            <Link className='btn category' onClick={scrollTop} to={`/posts/categories/${category}`}>{category}</Link>
+          </span>
         </div>
       </div>
     </article>
   )
 }
 
-export default PostItem
+export default PostItem;
