@@ -35,9 +35,7 @@ const Register = () => {
       if(!newUser) {
         setError('Registration failed. Please try again.')
       } else {
-          useEffect(() => {
-    navigate('/login')
-  }, [])
+          navigate('/login')
       }
     } catch (err) {
       console.error('Registration error:', err)
