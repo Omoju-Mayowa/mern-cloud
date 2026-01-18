@@ -8,20 +8,29 @@ const scrollTop = () => {
   window.scrollTo(0, 0);
 }
 
-const PostItem = ({ postID, category, title, description, authorID, thumbnail, videoUrl, createdAt, likesCount = 0, likedBy = [] }) => {
-  
-  // Base Assets URL from your Env
+// 1. MOVE HELPER OUTSIDE: This prevents recreation on every render
+// and makes it easier to manage.
+const resolveMediaUrl = (path, folder = 'mern') => {
+  if (!path) return null;
+
+  // 1. If it's already a full URL (starts with http), return as is.
+  if (path.startsWith('http')) return path;
+
   const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
 
-  // HELPER: Prevents double-pathing (e.g., /mern/mern/)
-  const resolveMediaUrl = (path, folder = 'mern') => {
-    if (!path) return null;
-    // If backend already saved the full Cloudflare URL, use it directly
-    if (path.startsWith('http')) return path;
-    // Fallback for old local/filename-only records
-    return `${assetsBase}/${folder}/${path}`;
-  };
+  // 2. SMART CHECK: If the path ALREADY includes the folder name 
+  // (e.g. "mern/image.jpg"), don't add it again.
+  if (path.startsWith(`${folder}/`)) {
+    return `${assetsBase}/${path}`;
+  }
 
+  // 3. FALLBACK: For old records that are ONLY the filename
+  return `${assetsBase}/${folder}/${path}`;
+};
+
+const PostItem = ({ postID, category, title, description, authorID, thumbnail, videoUrl, createdAt, likesCount = 0, likedBy = [] }) => {
+  
+  // 2. USE THE HELPER (The duplicate versions are now gone)
   const finalThumbnail = resolveMediaUrl(thumbnail, 'mern');
   const finalVideo = resolveMediaUrl(videoUrl, 'mern');
 
