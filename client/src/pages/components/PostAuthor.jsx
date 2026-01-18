@@ -1,22 +1,18 @@
 import React, { useEffect, useState } from 'react'
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import axios from 'axios';
 import ReactTimeAgo from 'react-time-ago'
 import TimeAgo from 'javascript-time-ago'
 import usePostStream from './usePostStream'
 
 import en from 'javascript-time-ago/locale/en.json'
-import ru from 'javascript-time-ago/locale/ru.json'
-
 TimeAgo.addDefaultLocale(en)
-TimeAgo.addLocale(ru)
 
 const scrollTop = () => {
   window.scrollTo(0, 0);
 }
 
-const PostAuthor = ({authorID, createdAt}) => {
-
+const PostAuthor = ({ authorID, createdAt }) => {
   const [author, setAuthor] = useState({})
 
   useEffect(() => {
@@ -26,39 +22,55 @@ const PostAuthor = ({authorID, createdAt}) => {
         const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/${authorID}`)
         setAuthor(response?.data)
       } catch (error) {
-        // handle missing author gracefully and surface errors for debugging
-        if (error.response?.status === 404) {
-          setAuthor({ name: 'Unknown', avatar: 'default-avatar.png' })
-        } else {
-          console.error('Failed to fetch author:', error.response?.status, error.response?.data || error.message)
-          setAuthor({ name: 'Unknown', avatar: 'default-avatar.png' })
-        }
+        console.error('Failed to fetch author:', error);
+        setAuthor({ name: 'Unknown', avatar: 'default-avatar.png' })
       }
     }
-
     getAuthor()
   }, [authorID])
 
-  // Real-time updates for author profile changes
   usePostStream((event, payload) => {
     if (event === 'profile_updated' && String(payload._id) === String(authorID)) {
       setAuthor(payload)
     }
   })
 
-  const baseUrl = import.meta.env.VITE_API_ASSETS_URL || ''
-  const assetsBase = baseUrl.replace('/api', '') || baseUrl
-  const safeAvatar = author?.avatar || 'avatar-default.png'
-  const avatarUrl = safeAvatar && (safeAvatar.startsWith && (safeAvatar.startsWith('http://') || safeAvatar.startsWith('https://'))) ? safeAvatar : `${assetsBase}/mern/${safeAvatar}`
+  // ==================== FIXED URL LOGIC ====================
+  const getAvatarUrl = () => {
+    const safeAvatar = author?.avatar;
+    
+    if (!safeAvatar || safeAvatar === 'default-avatar.png') {
+       // Fallback to a hardcoded default if nothing exists
+       return `https://your-public-r2-link.dev/avatars/default-avatar.png`; 
+    }
+
+    // If it's already a full Cloudflare URL, return it directly
+    if (typeof safeAvatar === 'string' && safeAvatar.startsWith('http')) {
+      return safeAvatar;
+    }
+
+    // Fallback for old database entries that only have the filename
+    const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
+    return `${assetsBase}/avatars/${safeAvatar}`;
+  }
 
   return (
     <Link onClick={scrollTop} to={`/profile/${authorID}`} className='post__author'>
         <div className="post__author-avatar">
-            <img src={avatarUrl} alt="" onError={(e) => { e.target.src = `${assetsBase}/avatar-default.png` }} />
+            <img 
+              src={getAvatarUrl()} 
+              alt={author?.name} 
+              onError={(e) => { 
+                e.target.onerror = null; 
+                e.target.src = 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev/avatars/default-avatar.png'; 
+              }} 
+            />
         </div>
         <div className="post__author-details">
-            <h5>By: {author?.name}</h5>
-            <small><ReactTimeAgo date={new Date(createdAt )} locale='en-US' /></small>
+            <h5>By: {author?.name || 'Unknown'}</h5>
+            <small>
+              {createdAt ? <ReactTimeAgo date={new Date(createdAt)} locale='en-US' /> : 'Just now'}
+            </small>
         </div>
     </Link>
   )
