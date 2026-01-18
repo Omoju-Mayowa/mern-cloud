@@ -7,7 +7,6 @@ import path from 'path';
 import User from '../models/userModel.js';
 import { HttpError } from "../models/errorModel.js";
 import { sendSSE } from './postControllers.js';
-import { prehashPassword, verifyPasswordWithPeppers, hashWithCurrentPepper } from '../utils/passwordUtils.js';
 import { s3Client, R2_BUCKET, uploadToR2, deleteFromR2 } from '../utils/r2Client.js';
 import { consumeIfNotWhitelisted, isIpWhitelisted, limiterSlowBruteByIP } from '../middleware/loginRateLimiter.js';
 import sendEmail from '../utils/sendEmail.js';
