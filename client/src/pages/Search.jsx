@@ -17,7 +17,6 @@ const Search = () => {
 
     const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
 
-    // Robust resolver to fix mern/mern/ nesting and missing placeholders
     const resolveUrl = (path, type = 'post') => {
         if (!path || path.includes('default') || path === 'video-placeholder.png') {
             return type === 'avatar' 
@@ -25,8 +24,6 @@ const Search = () => {
                 : `${assetsBase}/mern/post-placeholder.png`;
         }
         if (path.startsWith('http')) return path;
-        
-        // Fix: If path already contains 'mern/', don't add it again
         const cleanPath = path.startsWith('mern/') ? path : `mern/${path}`;
         return `${assetsBase}/${cleanPath}`;
     }
@@ -35,20 +32,30 @@ const Search = () => {
         if (!query.trim()) { setResults([]); return; }
         setLoading(true);
         try {
-            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/posts/search?q=${query}`)
-            setResults(response.data)
+            // NOTE: If this 404s, double check if your backend route is /posts/search or just /posts
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/posts/search?q=${query.trim()}`)
+            setResults(Array.isArray(response.data) ? response.data : [])
         } catch (err) {
-            console.error("Search failed", err);
+            console.error("Search API Error:", err.response?.status, err.message);
+            setResults([]);
         } finally { setLoading(false) }
     }
 
     const handleSearchChange = (e) => {
         const query = e.target.value
         setSearchQuery(query)
-        setSearchParams(query ? { q: query } : {})
+        // Update URL params without reloading
+        setSearchParams(query ? { q: query } : {}, { replace: true })
+        
         if (debounceTimer.current) clearTimeout(debounceTimer.current)
-        debounceTimer.current = setTimeout(() => handleSearch(query), 400)
+        debounceTimer.current = setTimeout(() => handleSearch(query), 500)
     }
+
+    // Trigger initial search if query exists in URL on mount
+    useEffect(() => {
+        const q = searchParams.get('q')
+        if (q) handleSearch(q)
+    }, [])
 
     return (
         <section className="posts">
@@ -57,7 +64,7 @@ const Search = () => {
                 <form onSubmit={(e) => e.preventDefault()} className="form login__form">
                     <input
                         type="text"
-                        placeholder="Search posts..."
+                        placeholder="Type to search..."
                         value={searchQuery}
                         onChange={handleSearchChange}
                         autoFocus
@@ -71,9 +78,10 @@ const Search = () => {
                                 <div className="post__thumbnail">
                                     <MediaDisplay 
                                         type={post.videoUrl ? "video" : "image"} 
-                                        src={resolveUrl(post.videoUrl || post.thumbnail)} 
-                                        poster={resolveUrl(post.thumbnail)}
+                                        src={post.videoUrl || post.thumbnail} 
+                                        poster={post.thumbnail}
                                         alt={post.title} 
+                                        autoPlay={false} // Only play on hover
                                     />
                                 </div>
                                 <div className="post__content">
@@ -91,7 +99,7 @@ const Search = () => {
                                                 />
                                             </div>
                                             <div className="post__author-details">
-                                                <h5>By: {post.creator?.name || 'Anonymous'}</h5>
+                                                <h5>{post.creator?.name || 'Author'}</h5>
                                                 {post.createdAt && <small><ReactTimeAgo date={new Date(post.createdAt)} locale='en-US' /></small>}
                                             </div>
                                         </div>
@@ -99,7 +107,7 @@ const Search = () => {
                                     </div>
                                 </div>
                             </article>
-                        )) : searchQuery && <p className="center">No posts found for "{searchQuery}"</p>}
+                        )) : searchQuery && !loading && <p className="center">No results found for "{searchQuery}"</p>}
                     </div>
                 )}
             </div>
