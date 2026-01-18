@@ -10,7 +10,6 @@ import axios from 'axios'
 const PostDetail = () => {
   const {id} = useParams()
   const [post, setPost] = useState(null)
-  const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const {currentUser} = useContext(UserContext)
   const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
@@ -21,9 +20,7 @@ const PostDetail = () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/posts/${id}`)
         setPost(response?.data)
-      } catch (err) {
-        setError(err.message)
-      }
+      } catch (err) { console.error(err) }
       setIsLoading(false)
     }
     getPost()
@@ -31,12 +28,17 @@ const PostDetail = () => {
 
   if (isLoading) return <Loader />
 
-  const imageUrl = post?.thumbnail?.startsWith('http') ? post.thumbnail : `${assetsBase}/mern/${post?.thumbnail}`;
-  const videoUrl = post?.videoUrl?.startsWith('http') ? post.videoUrl : `${assetsBase}/mern/${post?.videoUrl}`;
+  const resolveUrl = (path) => {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    return path.startsWith('mern/') ? `${assetsBase}/${path}` : `${assetsBase}/mern/${path}`;
+  }
+
+  const imageUrl = resolveUrl(post?.thumbnail);
+  const videoUrl = resolveUrl(post?.videoUrl);
 
   return (
     <section className="post-detail">
-      {error && <p className='error'>{error}</p>}
       {post && (
         <div className="container post-detail__container">
           <div className="post-detail__header">
@@ -52,9 +54,9 @@ const PostDetail = () => {
           <div className="post-detail__thumbnail">
             {post.videoUrl ? (
               <video src={videoUrl} poster={imageUrl} controls className="video-player" />
-            ) : post.thumbnail ? (
-              <img src={imageUrl} alt="" />
-            ) : null}
+            ) : (
+              <img src={imageUrl || `${assetsBase}/mern/post-placeholder.png`} alt={post.title} />
+            )}
           </div>
           <p dangerouslySetInnerHTML={{__html: post.description}}></p>
         </div>
@@ -63,4 +65,4 @@ const PostDetail = () => {
   )
 }
 
-export default PostDetail
+export default PostDetail;
