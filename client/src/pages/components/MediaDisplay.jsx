@@ -1,31 +1,40 @@
 import React, { useState, useRef, useEffect } from 'react'
 
-const MediaDisplay = ({ type = 'image', src, alt = 'Media', autoPlay = false, controls = true, poster = null }) => {
+const MediaDisplay = ({ type = 'image', src, alt = 'Media', autoPlay = false, controls = true, poster = null, muted = false }) => {
     const [isHovering, setIsHovering] = useState(false)
     const videoRef = useRef(null)
 
-    // Remove /api from base URL if present since uploads are served directly
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
-    const assetsBase = baseUrl.replace('/api', '') || baseUrl
+    // Robust URL resolver: Fixes the mern/mern and uploads/ issues
     const getMediaUrl = (mediaSrc) => {
         if (!mediaSrc) return ''
-        if (mediaSrc.startsWith('http://') || mediaSrc.startsWith('https://')) {
-            return mediaSrc
+        if (mediaSrc.startsWith('http')) return mediaSrc
+
+        const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
+
+        // Check if path already contains a folder prefix to prevent doubling
+        if (mediaSrc.startsWith('mern/') || mediaSrc.startsWith('uploads/')) {
+            return `${assetsBase}/${mediaSrc}`
         }
-        return `${assetsBase}/uploads/${mediaSrc}`
+
+        // Fallback to mern folder
+        return `${assetsBase}/mern/${mediaSrc}`
     }
 
     // Auto-play/pause video on hover
     useEffect(() => {
-        if (videoRef.current) {
-            if (isHovering && autoPlay) {
-                videoRef.current.play().catch(err => console.log('Video play failed:', err))
+        if (videoRef.current && type === 'video') {
+            if (isHovering || autoPlay) {
+                // If muted is false, this will throw "NotAllowedError" 
+                // unless the user has interacted with the page first.
+                videoRef.current.play().catch(err => {
+                    console.warn('Playback blocked: Browsers require user interaction for non-muted video.', err)
+                })
             } else {
                 videoRef.current.pause()
                 videoRef.current.currentTime = 0
             }
         }
-    }, [isHovering, autoPlay])
+    }, [isHovering, autoPlay, type])
 
     if (type === 'video' && src) {
         return (
@@ -39,6 +48,8 @@ const MediaDisplay = ({ type = 'image', src, alt = 'Media', autoPlay = false, co
                     src={getMediaUrl(src)}
                     alt={alt}
                     controls={controls}
+                    muted={muted} // Set to false based on your request
+                    playsInline={true} // Crucial for mobile and some desktop browsers
                     poster={poster ? getMediaUrl(poster) : undefined}
                     className="video-player"
                 />
@@ -46,7 +57,6 @@ const MediaDisplay = ({ type = 'image', src, alt = 'Media', autoPlay = false, co
         )
     }
 
-    // Default to image
     return (
         <div className="media-display media-image">
             <img 
