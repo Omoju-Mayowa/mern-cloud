@@ -54,7 +54,7 @@ const PostAuthor = ({authorID, createdAt}) => {
   return (
     <Link onClick={scrollTop} to={`/profile/${authorID}`} className='post__author'>
         <div className="post__author-avatar">
-            <img src={avatarUrl} alt="" onError={(e) => { e.target.src = `${assetsBase}/mern/avatar-default.png` }} />
+            <img src={avatarUrl} alt="" onError={(e) => { e.target.src = `${assetsBase}/avatar-default.png` }} />
         </div>
         <div className="post__author-details">
             <h5>By: {author?.name}</h5>
