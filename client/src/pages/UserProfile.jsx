@@ -40,7 +40,7 @@ const UserProfile = () => {
     const fetchUserData = async () => {
       try {
         setLoading(true)
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/${id}`)
+        const response = await axios.get(`${import.meta.env.VITE_API_ASSETS_URL}/users/${id}`)
         setUserData(response.data)
         setFormData({
           name: response.data.name || '',
