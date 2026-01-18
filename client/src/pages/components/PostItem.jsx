@@ -23,7 +23,7 @@ const PostItem = ({postID, category, title, description, authorID, thumbnail, vi
   const postTitle = title.length > 60 ? title.substr(0, 120) + '...' : title;
   // ? ImageUrl for thumbnail for easy editing
   const assetsBase = import.meta.env.VITE_API_BASE_URL || 'https://5df0a2941a74cae5cfbfcdd3744c8161.r2.cloudflarestorage.com/mern'
-  const safeThumbnail = thumbnail || 'default-avatar.png'
+  const safeThumbnail = thumbnail
   const imageUrl = safeThumbnail && (safeThumbnail.startsWith('http://') || safeThumbnail.startsWith('https://')) ? safeThumbnail : `${assetsBase}/mern/${safeThumbnail}`
   // Determine what to display
   // Priority: video with thumbnail poster > thumbnail only > video only > default
