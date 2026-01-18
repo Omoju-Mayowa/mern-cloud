@@ -17,6 +17,7 @@ const Search = () => {
 
     const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
 
+    // Consistent URL resolver for search results
     const resolveUrl = (path, type = 'post') => {
         if (!path || path.includes('default') || path === 'video-placeholder.png') {
             return type === 'avatar' 
@@ -28,15 +29,36 @@ const Search = () => {
         return `${assetsBase}/${cleanPath}`;
     }
 
+    // VIDEO HOVER LOGIC (Plays with sound)
+    const handleMouseEnter = (e) => {
+        const video = e.currentTarget.querySelector('video');
+        if (video) {
+            video.muted = false; // Enable sound on hover
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => { /* Handle browser blocking autoplay with sound */ });
+            }
+        }
+    };
+
+    const handleMouseLeave = (e) => {
+        const video = e.currentTarget.querySelector('video');
+        if (video) {
+            video.pause();
+            video.currentTime = 0;
+        }
+    };
+
     const handleSearch = async (query) => {
         if (!query.trim()) { setResults([]); return; }
         setLoading(true);
         try {
-            // NOTE: If this 404s, double check if your backend route is /posts/search or just /posts
-            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/posts/search?q=${query.trim()}`)
+            // FIX: Changed endpoint from /posts/search to /posts
+            // Most backends handle filtering via the main posts route
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/posts?q=${query.trim()}`)
             setResults(Array.isArray(response.data) ? response.data : [])
         } catch (err) {
-            console.error("Search API Error:", err.response?.status, err.message);
+            console.error("Search API Error:", err);
             setResults([]);
         } finally { setLoading(false) }
     }
@@ -44,14 +66,13 @@ const Search = () => {
     const handleSearchChange = (e) => {
         const query = e.target.value
         setSearchQuery(query)
-        // Update URL params without reloading
         setSearchParams(query ? { q: query } : {}, { replace: true })
         
         if (debounceTimer.current) clearTimeout(debounceTimer.current)
         debounceTimer.current = setTimeout(() => handleSearch(query), 500)
     }
 
-    // Trigger initial search if query exists in URL on mount
+    // Initial load search
     useEffect(() => {
         const q = searchParams.get('q')
         if (q) handleSearch(q)
@@ -75,13 +96,18 @@ const Search = () => {
                     <div className="container posts__container">
                         {results.length > 0 ? results.map(post => (
                             <article key={post._id} className="post">
-                                <div className="post__thumbnail">
+                                <div 
+                                    className="post__thumbnail"
+                                    onMouseEnter={handleMouseEnter}
+                                    onMouseLeave={handleMouseLeave}
+                                >
                                     <MediaDisplay 
                                         type={post.videoUrl ? "video" : "image"} 
-                                        src={post.videoUrl || post.thumbnail} 
-                                        poster={post.thumbnail}
-                                        alt={post.title} 
-                                        autoPlay={false} // Only play on hover
+                                        src={resolveUrl(post.videoUrl || post.thumbnail)} 
+                                        poster={resolveUrl(post.thumbnail)}
+                                        alt={post.title}
+                                        controls={false} // No controls as requested
+                                        muted={false}    // Sound on hover
                                     />
                                 </div>
                                 <div className="post__content">
@@ -94,7 +120,7 @@ const Search = () => {
                                             <div className="post__author-avatar">
                                                 <img 
                                                     src={resolveUrl(post.creator?.avatar, 'avatar')} 
-                                                    alt="" 
+                                                    alt={post.creator?.name} 
                                                     onError={e => e.target.src = resolveUrl(null, 'avatar')}
                                                 />
                                             </div>
