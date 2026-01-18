@@ -4,11 +4,10 @@ import Post from '../models/postModel.js';
 import User from '../models/userModel.js';
 import { v4 as uuid } from 'uuid';
 import path from 'path';
-
-import { HttpError } from '../models/errorModel.js';
 import mongoose from 'mongoose';
 import s3 from '../utils/r2Client.js';
 import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { HttpError } from '../models/errorModel.js';
 
 // Thumbnail and video max sizes
 const thumbnailSizeBytes = 1073741824; // 1GB
@@ -38,7 +37,7 @@ const uploadToR2 = async (fileBuffer, filename, folder = "mern") => {
         Bucket: process.env.CLOUDFLARE_R2_BUCKET,
         Key: key,
         Body: fileBuffer,
-        ContentType: "video/mp4", // or "image/jpeg" dynamically
+        ContentType: "application/octet-stream", // dynamic MIME can be added if needed
     });
     await s3.send(command);
     return `${process.env.CLOUDFLARE_R2_ENDPOINT}/${key}`;
@@ -92,7 +91,6 @@ const createPost = async (req, res, next) => {
 
         const currentUser = await User.findById(req.user.id);
         await User.findByIdAndUpdate(req.user.id, { posts: (currentUser.posts || 0) + 1 });
-
         const updatedUser = await User.findById(req.user.id).select('-password');
 
         sendSSE('post_created', newPost);
@@ -130,7 +128,7 @@ const getPost = async (req, res, next) => {
 };
 
 // ==================== GET POSTS BY CATEGORY ====================
-const getCategoryPosts = async (req, res, next) => {
+const getcategoryPosts = async (req, res, next) => {
     try {
         const { category } = req.params;
         const posts = await Post.find({ category }).sort({ createdAt: -1 });
@@ -261,7 +259,6 @@ const streamPosts = (req, res) => {
     res.setHeader('Access-Control-Allow-Credentials', 'true');
 
     sseClients.add(res);
-
     res.write(`data: ${JSON.stringify({ event: 'connected', payload: {} })}\n\n`);
 
     const heartbeat = setInterval(() => {
@@ -273,15 +270,4 @@ const streamPosts = (req, res) => {
     res.on('error', () => { clearInterval(heartbeat); sseClients.delete(res); });
 };
 
-export {
-    createPost,
-    getPosts,
-    getPost,
-    getCategoryPosts,
-    getUserPosts,
-    editPost,
-    deletePost,
-    likePost,
-    streamPosts,
-    sendSSE
-};
+export { createPost, getPosts, getPost, getcategoryPosts, getUserPosts, editPost, deletePost, likePost, streamPosts, sendSSE };
