@@ -1,37 +1,21 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const sendEmail = async function (to, subject, message) {
-    try {
-        const info = await transporter.sendMail({
-            from: `"Security Alert" <${process.env.EMAIL_USER}>`,
-            to,
-            subject,
-            html: message,
-        });
-
-        console.log('Email sent:', info.messageId);
-        console.log('Preview URL (if using ethereal):', nodemailer.getTestMessageUrl(info));
-        return true;
-    } catch (error) {
-        console.error("Email failed:", error);
-        return false;
-    }
+const sendEmail = async (to, subject, html) => {
+  try {
+    await sgMail.send({
+      to,
+      from: process.env.EMAIL_FROM, // loaded from env, safe in repo
+      subject,
+      html,
+    });
+    console.log('Email sent to', to);
+    return true;
+  } catch (err) {
+    console.error('SendGrid error:', err.response?.body || err);
+    return false;
+  }
 };
 
 export default sendEmail;
