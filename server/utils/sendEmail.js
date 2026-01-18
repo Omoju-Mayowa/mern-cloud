@@ -1,19 +1,26 @@
+// sendEmail.js
 import sgMail from '@sendgrid/mail';
 
+// Set SendGrid API key from environment
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const sendEmail = async (to, subject, html) => {
+const sendEmail = async function (to, subject, message) {
   try {
-    await sgMail.send({
+    const info = await sgMail.send({
       to,
-      from: process.env.EMAIL_FROM, // loaded from env, safe in repo
+      from: {
+        email: process.env.EMAIL_FROM_EMAIL,   // verified email
+        name: process.env.EMAIL_FROM_NAME || 'Security Alert', // display name
+      },
       subject,
-      html,
+      html: message,
     });
-    console.log('Email sent to', to);
+
+    // info is an array for API requests, log for consistency
+    console.log('Email sent:', info[0].statusCode);
     return true;
-  } catch (err) {
-    console.error('SendGrid error:', err.response?.body || err);
+  } catch (error) {
+    console.error('Email failed:', error.response?.body || error);
     return false;
   }
 };
