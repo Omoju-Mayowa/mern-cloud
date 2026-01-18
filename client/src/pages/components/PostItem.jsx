@@ -31,7 +31,7 @@ const PostItem = ({ postID, category, title, description, authorID, thumbnail, v
     <article className="post">
       <div className="post__thumbnail">
         {finalVideo && videoUrl ? (
-          <MediaDisplay type="video" src={finalVideo} alt={title} poster={finalThumbnail} />
+          <MediaDisplay type="video" controls='false' autoplay='true' src={finalVideo} alt={title} poster={finalThumbnail} />
         ) : (
           <MediaDisplay type="image" src={finalThumbnail} alt={title} />
         )}
