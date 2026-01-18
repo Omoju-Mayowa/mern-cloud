@@ -26,13 +26,14 @@ const Search = () => {
     const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
 
     // Helper to resolve URLs consistently
-    const resolveUrl = (fileName, type = 'post') => {
-        if (!fileName || fileName.includes('default') || fileName === 'video-placeholder.png') {
-            return `${assetsBase}/mern/default-avatar.png`;
+    const resolveUrl = (fileName) => {
+        // If no filename, use a generic post placeholder (not an avatar)
+        if (!fileName || fileName.includes('default')) {
+            return `${assetsBase}/mern/post-placeholder.png`; 
         }
         return fileName.startsWith('http') ? fileName : `${assetsBase}/mern/${fileName}`;
     }
-
+    
     usePostStream((event, payload) => {
         if (['post_created', 'post_updated', 'post_deleted'].includes(event)) {
             if (searchQuery.trim()) handleSearch(searchQuery);
