@@ -189,9 +189,7 @@ const Search = () => {
                 </form>
 
                 {loading && (
-                    <div className="center">
-                      <Loader size='small' />
-                    </div>
+                    <Loader size='small' />
                 )}
 
                 {!loading && results.length > 0 && (
