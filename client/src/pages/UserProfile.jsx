@@ -40,7 +40,7 @@ const UserProfile = () => {
     const fetchUserData = async () => {
       try {
         setLoading(true)
-        const response = await axios.get(`${import.meta.env.VITE_API_ASSETS_URL}/users/${id}`)
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/${id}`)
         setUserData(response.data)
         setFormData({
           name: response.data.name || '',
@@ -50,7 +50,7 @@ const UserProfile = () => {
           confirmNewPassword: ''
         })
         if (response.data.avatar) {
-          const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
+          const baseUrl = import.meta.env.VITE_API_ASSETS_URL || ''
           const assetsBase = baseUrl.replace('/api', '') || baseUrl
           setAvatar(`${assetsBase}/uploads/${response.data.avatar}`)
         } else {
