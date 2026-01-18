@@ -345,47 +345,38 @@ const updateUserProfile = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { name, email } = req.body;
-        const userId = req.user.id;
-        if (id !== userId) return next(new HttpError('You can only update your own profile', 403));
+        if (id !== req.user.id) return next(new HttpError('Unauthorized', 403));
 
         const user = await User.findById(id);
         if (!user) return next(new HttpError('User not found', 404));
 
-        if (name && name.trim()) user.name = name.trim();
-        if (email && email.trim()) {
-            const existingUser = await User.findOne({ email: email.trim(), _id: { $ne: id } });
-            if (existingUser) return next(new HttpError('Email already in use', 422));
-            user.email = email.trim();
-        }
+        if (name) user.name = name;
+        if (email) user.email = email;
 
-        // Avatar upload to R2
         if (req.files && req.files.avatar) {
             const { avatar } = req.files;
-            const fileSizeLimit = 5242880;
-            if (avatar.size > fileSizeLimit) return next(new HttpError('Avatar too large. File should be less than 5MB', 413));
+            if (avatar.size > 5242880) return next(new HttpError('Avatar too large', 413));
 
-            const fileName = avatar.name;
-            const ext = fileName.split('.').pop();
-            const newFileName = `avatar-${uuid()}.${ext}`;
-            const key = `avatars/${newFileName}`;
-            const command = new PutObjectCommand({
+            const ext = path.extname(avatar.name);
+            const key = `avatars/${uuid()}${ext}`;
+
+            await s3.send(new PutObjectCommand({
                 Bucket: process.env.CLOUDFLARE_R2_BUCKET,
                 Key: key,
                 Body: avatar.data,
-                ContentType: avatar.mimetype,
-                ACL: 'public-read'
-            });
-            await s3.send(command);
-            user.avatar = `${process.env.CLOUDFLARE_R2_ENDPOINT}/${key}`;
+                ContentType: avatar.mimetype
+            }));
+
+            // FIXED: Use ASSETS URL instead of ENDPOINT URL
+            user.avatar = `${process.env.CLOUDFLARE_R2_ASSETS_URL}/${key}`;
         }
 
         await user.save();
         const updatedUser = await User.findById(id).select('-password');
         sendSSE('profile_updated', updatedUser.toObject());
-        res.status(200).json({ message: 'Profile updated successfully', ...updatedUser.toObject() });
+        res.status(200).json(updatedUser);
     } catch (error) {
-        return next(new HttpError(error.message || 'Failed to update profile', 500));
+        return next(new HttpError(error.message, 500));
     }
 };
-
 export { registerUser, loginUser, getUser, changeAvatar, editUser, updateUserProfile, getAuthors };
