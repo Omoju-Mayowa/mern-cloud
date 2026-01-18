@@ -1,27 +1,34 @@
-// frontend/components/PostItem.jsx
 import React from 'react'
 import { Link } from 'react-router-dom'
 import PostAuthor from './PostAuthor'
 import LikeButton from './LikeButton'
 import MediaDisplay from './MediaDisplay'
 
-const PostItem = ({postID, category, title, description, authorID, thumbnail, videoUrl, createdAt, likesCount = 0, likedBy = []}) => {
-  
-  const stripHtml = (html) => html?.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim() || '';
-  const shortDescription = stripHtml(description).length > 145 ? stripHtml(description).substr(0, 145) + '...' : stripHtml(description);
+const scrollTop = () => {
+  window.scrollTo(0, 0);
+}
 
-  // HELPER: Resolves R2 URLs correctly
-  const getMediaUrl = (path) => {
-    if (!path || path === 'default-avatar.png') return null;
-    if (path.startsWith('http')) return path; // Already a full URL from Cloudflare
-    
-    // Fallback for old records that only saved the filename/key
-    const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
-    return `${assetsBase}/mern/${path}`;
+const PostItem = ({ postID, category, title, description, authorID, thumbnail, videoUrl, createdAt, likesCount = 0, likedBy = [] }) => {
+  
+  // Base Assets URL from your Env
+  const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
+
+  // HELPER: Prevents double-pathing (e.g., /mern/mern/)
+  const resolveMediaUrl = (path, folder = 'mern') => {
+    if (!path) return null;
+    // If backend already saved the full Cloudflare URL, use it directly
+    if (path.startsWith('http')) return path;
+    // Fallback for old local/filename-only records
+    return `${assetsBase}/${folder}/${path}`;
   };
 
-  const finalThumbnail = getMediaUrl(thumbnail);
-  const finalVideo = getMediaUrl(videoUrl);
+  const finalThumbnail = resolveMediaUrl(thumbnail, 'mern');
+  const finalVideo = resolveMediaUrl(videoUrl, 'mern');
+
+  // Strip HTML for description preview
+  const stripHtml = (html) => html?.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim() || '';
+  const shortDescription = stripHtml(description).length > 145 ? stripHtml(description).substr(0, 145) + '...' : stripHtml(description);
+  const postTitle = title.length > 60 ? title.substr(0, 60) + '...' : title;
 
   return (
     <article className="post">
@@ -30,26 +37,34 @@ const PostItem = ({postID, category, title, description, authorID, thumbnail, vi
           <MediaDisplay 
             type="video" 
             src={finalVideo} 
-            poster={finalThumbnail} 
+            alt={title} 
             autoPlay={true} 
             controls={false} 
+            poster={finalThumbnail}
           />
         ) : finalThumbnail ? (
-          <MediaDisplay type="image" src={finalThumbnail} alt={title} />
+          <MediaDisplay 
+            type="image" 
+            src={finalThumbnail} 
+            alt={title} 
+          />
         ) : (
-          <div className="placeholder">No Media</div>
+          <div className="placeholder-box">No Media</div>
         )}
       </div>
+
       <div className="post__content">
-        <Link to={`/posts/${postID}`}>
-          <h3>{title}</h3>
+        <Link to={`/posts/${postID}`} onClick={scrollTop}>
+          <h3>{postTitle}</h3>
           <p>{shortDescription}</p>
         </Link>
         <div className="post__footer">
           <PostAuthor authorID={authorID} createdAt={createdAt} />
           <span>
             <LikeButton postID={postID} initialLikesCount={likesCount} initialLikedBy={likedBy} />
-            <Link className='btn category' to={`/posts/categories/${category}`}>{category}</Link>
+            <Link className='btn category' onClick={scrollTop} to={`/posts/categories/${category}`}>
+              {category}
+            </Link>
           </span>
         </div>
       </div>
