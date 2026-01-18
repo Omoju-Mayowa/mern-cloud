@@ -30,7 +30,7 @@ const PostItem = ({postID, category, title, description, authorID, thumbnail, vi
   const hasVideo = videoUrl && videoUrl.trim() !== ''
   const hasThumbnail = thumbnail && thumbnail.trim() !== '' && thumbnail !== 'default-avatar.png' && thumbnail !== 'video-placeholder.png'
   
-  // console.log('Image URL:', imageUrl, 'Thumbnail:', safeThumbnail, 'Video:', videoUrl);
+  console.log('Image URL:', imageUrl, 'Thumbnail:', safeThumbnail, 'Video:', videoUrl);
   
   // *
   return (
