@@ -30,17 +30,18 @@ const sendSSE = (event, payload) => {
     });
 };
 
-// ==================== Helper: Upload file to R2 ====================
+// ==================== Upload file to Cloudflare R2 ====================
 const uploadToR2 = async (fileBuffer, filename, folder = "mern") => {
     const key = `${folder}/${filename}`;
     const command = new PutObjectCommand({
         Bucket: process.env.CLOUDFLARE_R2_BUCKET,
         Key: key,
         Body: fileBuffer,
-        ContentType: "application/octet-stream", // dynamic MIME can be added if needed
+        ContentType: "application/octet-stream",
+        ACL: 'public-read'
     });
     await s3.send(command);
-    return `${process.env.CLOUDFLARE_R2_ENDPOINT}/${key}`;
+    return key; // only store key/filename in DB
 };
 
 // ==================== CREATE POST ====================
@@ -56,8 +57,8 @@ const createPost = async (req, res, next) => {
         }
 
         const { thumbnail, video } = req.files || {};
-        let thumbnailUrl = null;
-        let videoUrl = null;
+        let thumbnailKey = null;
+        let videoKey = null;
 
         if (thumbnail) {
             if (thumbnail.size > thumbnailSizeBytes) {
@@ -65,7 +66,7 @@ const createPost = async (req, res, next) => {
             }
             const ext = path.extname(thumbnail.name);
             const newFileName = `thumbnail-${uuid()}${ext}`;
-            thumbnailUrl = await uploadToR2(thumbnail.data, newFileName);
+            thumbnailKey = await uploadToR2(thumbnail.data, newFileName);
         }
 
         if (video) {
@@ -74,16 +75,16 @@ const createPost = async (req, res, next) => {
             }
             const ext = path.extname(video.name);
             const newVideoName = `video-${uuid()}${ext}`;
-            videoUrl = await uploadToR2(video.data, newVideoName);
+            videoKey = await uploadToR2(video.data, newVideoName);
         }
 
         const postData = {
             title,
             category,
             description,
-            thumbnail: thumbnailUrl,
-            videoUrl,
-            creator: req.user.id,
+            thumbnail: thumbnailKey,
+            videoUrl: videoKey,
+            creator: req.user.id
         };
 
         const newPost = await Post.create(postData);
@@ -270,4 +271,15 @@ const streamPosts = (req, res) => {
     res.on('error', () => { clearInterval(heartbeat); sseClients.delete(res); });
 };
 
-export { createPost, getPosts, getPost, getcategoryPosts, getUserPosts, editPost, deletePost, likePost, streamPosts, sendSSE };
+export {
+    createPost,
+    getPosts,
+    getPost,
+    getcategoryPosts,
+    getUserPosts,
+    editPost,
+    deletePost,
+    likePost,
+    streamPosts,
+    sendSSE
+};
