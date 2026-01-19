@@ -12,7 +12,7 @@ import { getPeppers, getCurrentPepper } from '../utils/peppers.js';
 
 const avatarSizeBytes = 10485760; 
 
-// Moderate Argon settings to prevent Railway CPU timeout while maintaining high security
+// Moderate Argon settings to balance security and Railway CPU limits
 const argonOptionsStrong = {
     type: argon2.argon2id,
     memoryCost: 2 ** 17, 
@@ -20,19 +20,24 @@ const argonOptionsStrong = {
     parallelism: 4,
 };
 
+/**
+ * Pre-hashes the password using SHA256 before passing to Argon2.
+ * This ensures a consistent input length and adds a baseline layer of hashing.
+ */
 const prehashPassword = password => crypto.createHash('sha256').update(password).digest('hex');
 
 /**
  * OPTIMIZED VERIFICATION
- * Stops the 1.3 min delay by targeting the correct pepper index immediately.
+ * 1. Checks the stored pepper version first (Fast Path).
+ * 2. Checks a limited number of recent peppers if the first fails (Recovery Path).
  */
 async function verifyPasswordWithPeppers(storedHash, prehashedPassword, userPepperVersion) {
     const peppers = getPeppers();
     const len = peppers.length;
     if (len === 0) return null;
 
-    // --- 1. FAST PATH (Primary Check) ---
-    // This is why your correct passwords are now fast (~1s).
+    // --- 1. FAST PATH ---
+    // Try the version recorded in MongoDB. This takes ~1s.
     const start = (Number.isInteger(userPepperVersion) && userPepperVersion >= 0 && userPepperVersion < len) ? userPepperVersion : 0;
     
     try {
@@ -43,16 +48,13 @@ async function verifyPasswordWithPeppers(storedHash, prehashedPassword, userPepp
     }
 
     // --- 2. LIMITED RECOVERY PATH ---
-    // Instead of checking ALL peppers (which takes 1.3 mins),
-    // we only check the 3 most recent ones.
+    // Check the 3 most recent peppers as fallback. Prevents the 1.3min loop.
     const lookbackLimit = 3; 
     const startIndex = Math.max(0, len - lookbackLimit);
 
     for (let i = len - 1; i >= startIndex; i--) {
         if (i === start) continue; 
         try {
-            // This still takes ~1.5s per check. 
-            // 3 checks = ~4.5s total delay for a wrong password.
             const isMatch = await argon2.verify(storedHash, (peppers[i] || '') + prehashedPassword);
             if (isMatch) return i;
         } catch {
@@ -60,15 +62,20 @@ async function verifyPasswordWithPeppers(storedHash, prehashedPassword, userPepp
         }
     }
     
-    return null; // Stop here! Don't keep looping for minutes.
+    return null; 
 }
 
+/**
+ * Generates a new Argon2 hash using the most recent pepper in the JSON file.
+ */
 async function hashWithCurrentPepper(prehashedPassword) {
     const current = getCurrentPepper();
     const peppers = getPeppers();
+    const hash = await argon2.hash((current || '') + prehashedPassword, argonOptionsStrong);
+    const version = peppers.indexOf(current);
     return {
-        hash: await argon2.hash((current || '') + prehashedPassword, argonOptionsStrong),
-        version: peppers.indexOf(current) !== -1 ? peppers.indexOf(current) : 0
+        hash,
+        version: version !== -1 ? version : 0
     };
 }
 
@@ -100,6 +107,8 @@ export const registerUser = async (req, res, next) => {
     }
 };
 
+
+
 export const loginUser = async (req, res, next) => {
     const { email, password } = req.body;
 
@@ -111,10 +120,12 @@ export const loginUser = async (req, res, next) => {
         const user = await User.findOne({ email: email.toLowerCase() });
         if (!user) return next(new HttpError('Invalid credentials', 401));
 
-        // Perform optimized verification
+        const prehashed = prehashPassword(password);
+        
+        // Verify the password
         const matchedIndex = await verifyPasswordWithPeppers(
             user.password, 
-            prehashPassword(password), 
+            prehashed, 
             user.pepperVersion
         );
 
@@ -122,9 +133,18 @@ export const loginUser = async (req, res, next) => {
             return next(new HttpError('Invalid credentials', 401));
         }
 
-        // SELF-HEALING: If the loop found a different pepper than what was in DB, fix DB now
-        if (matchedIndex !== user.pepperVersion) {
-            await User.findByIdAndUpdate(user._id, { pepperVersion: matchedIndex });
+        // --- AUTOMATIC SECURITY UPGRADE ---
+        // If the password matches but isn't using the latest pepper, upgrade it now.
+        const peppers = getPeppers();
+        const latestVersion = peppers.length - 1;
+
+        if (matchedIndex !== latestVersion) {
+            const { hash, version } = await hashWithCurrentPepper(prehashed);
+            await User.findByIdAndUpdate(user._id, { 
+                password: hash, 
+                pepperVersion: version 
+            });
+            console.log(`User ${user.email} security upgraded to latest pepper index: ${version}`);
         }
 
         const token = jwt.sign(
