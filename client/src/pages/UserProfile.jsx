@@ -158,11 +158,13 @@ const UserProfile = () => {
                     <input type="password" placeholder='Confirm New Password' name='confirmNewPassword' value={formData.confirmNewPassword} onChange={handleInputChange} />
                   </>
                 )}
-                
+                                
                 <button type="submit" className='btn primary'>Update Details</button>
               </>
             )}
           </form>
+
+          <br />
 
           {!isEditing && currentUser?.id === id && (
             <button className='btn primary' onClick={() => setIsEditing(true)}><FaEdit /> Edit Profile</button>
