@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import axios from '../axios'; // Import our custom instance
+import axios from '../components/axios' // Import our custom instance
 import { UserContext } from './components/context/userContext'
 
 const Login = () => {
