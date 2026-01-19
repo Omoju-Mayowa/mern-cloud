@@ -31,8 +31,8 @@ async function verifyPasswordWithPeppers(storedHash, prehashedPassword, userPepp
     const len = peppers.length;
     if (len === 0) return null;
 
-    // --- STEP 1: FAST PATH (Primary Check) ---
-    // Use the version from DB. This makes correct logins take ~1-2s instead of 1.3m
+    // --- 1. FAST PATH (Primary Check) ---
+    // This is why your correct passwords are now fast (~1s).
     const start = (Number.isInteger(userPepperVersion) && userPepperVersion >= 0 && userPepperVersion < len) ? userPepperVersion : 0;
     
     try {
@@ -42,12 +42,17 @@ async function verifyPasswordWithPeppers(storedHash, prehashedPassword, userPepp
         console.error("Argon verify error on fast path", err);
     }
 
-    // --- STEP 2: RECOVERY PATH (Safety Net) ---
-    // If fast path fails, check others. This handles "corrupted" pepperVersion numbers in DB.
-    // We check backwards from newest to oldest as it's more likely to match recent peppers.
-    for (let i = len - 1; i >= 0; i--) {
-        if (i === start) continue; // Skip what we already checked
+    // --- 2. LIMITED RECOVERY PATH ---
+    // Instead of checking ALL peppers (which takes 1.3 mins),
+    // we only check the 3 most recent ones.
+    const lookbackLimit = 3; 
+    const startIndex = Math.max(0, len - lookbackLimit);
+
+    for (let i = len - 1; i >= startIndex; i--) {
+        if (i === start) continue; 
         try {
+            // This still takes ~1.5s per check. 
+            // 3 checks = ~4.5s total delay for a wrong password.
             const isMatch = await argon2.verify(storedHash, (peppers[i] || '') + prehashedPassword);
             if (isMatch) return i;
         } catch {
@@ -55,7 +60,7 @@ async function verifyPasswordWithPeppers(storedHash, prehashedPassword, userPepp
         }
     }
     
-    return null; // Truly invalid password
+    return null; // Stop here! Don't keep looping for minutes.
 }
 
 async function hashWithCurrentPepper(prehashedPassword) {
