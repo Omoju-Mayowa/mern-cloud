@@ -27,7 +27,6 @@ const PostAuthor = ({ authorID, createdAt }) => {
     getAuthor();
   }, [authorID]);
 
-  // Listen for real-time profile changes
   usePostStream((event, payload) => {
     if (event === 'profile_updated' && String(payload._id) === String(authorID)) {
       setAuthor(payload);
@@ -41,7 +40,7 @@ const PostAuthor = ({ authorID, createdAt }) => {
     }
     if (avatar.startsWith('http')) return avatar;
     
-    // Smart resolver: don't add "mern/" if it's already there
+    // Smart resolver: prevent double "mern/"
     const cleanPath = avatar.startsWith('mern/') ? avatar : `mern/${avatar}`;
     return `${assetsBase}/${cleanPath}`;
   };
@@ -51,13 +50,17 @@ const PostAuthor = ({ authorID, createdAt }) => {
       <div className="post__author-avatar">
         <img 
           src={getAvatarUrl()} 
-          alt={author?.name} 
+          alt={author?.name || 'Author'} 
           onError={(e) => { e.target.src = `${assetsBase}/mern/default-avatar.png` }}
         />
       </div>
       <div className="post__author-details">
         <h5>By: {author?.name || 'Loading...'}</h5>
-        <small><ReactTimeAgo date={new Date(createdAt)} locale='en-US' /></small>
+        <small>
+          {createdAt && !isNaN(new Date(createdAt)) 
+            ? <ReactTimeAgo date={new Date(createdAt)} locale='en-US' /> 
+            : 'Just Now'}
+        </small>
       </div>
     </Link>
   )
