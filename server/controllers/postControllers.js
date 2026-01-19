@@ -1,4 +1,3 @@
-// backend/controllers/postControllers.js
 import Post from '../models/postModel.js';
 import User from '../models/userModel.js';
 import { v4 as uuid } from 'uuid';
@@ -12,32 +11,27 @@ const thumbnailSizeBytes = 1073741824;
 const videoSizeBytes = 5368709120; 
 
 const sseClients = new Set();
-const sendSSE = (event, payload) => {
+
+export const sendSSE = (event, payload) => {
     const data = JSON.stringify({ event, payload });
     sseClients.forEach(client => {
         try { client.write(`data: ${data}\n\n`); } catch (err) { sseClients.delete(client); }
     });
 };
 
-// ==================== FIXED UPLOAD LOGIC ====================
-// backend/controllers/postControllers.js
-
 const uploadToR2 = async (fileBuffer, filename, folder = "mern") => {
-    const key = `${folder}/${filename}`; // Result: "mern/filename.jpg"
+    const key = `${folder}/${filename}`;
     const command = new PutObjectCommand({
         Bucket: process.env.CLOUDFLARE_R2_BUCKET,
         Key: key,
         Body: fileBuffer,
-        ContentType: "image/jpeg", // Change based on file type if possible
+        ContentType: "image/jpeg", 
     });
     await s3.send(command);
-
-    // Return the FULL URL
-    // Result: https://pub-xxx.r2.dev/mern/filename.jpg
     return `${process.env.CLOUDFLARE_R2_ASSETS_URL}/${key}`;
 };
 
-const createPost = async (req, res, next) => {
+export const createPost = async (req, res, next) => {
     try {
         const { title, category, description } = req.body;
         if (!title || !category || !description) return next(new HttpError("Fill in all fields", 422));
@@ -49,12 +43,12 @@ const createPost = async (req, res, next) => {
 
         if (thumbnail) {
             if (thumbnail.size > thumbnailSizeBytes) return next(new HttpError("Thumbnail too big", 413));
-            thumbnailPath = await uploadToR2(thumbnail, "mern");
+            thumbnailPath = await uploadToR2(thumbnail.data, `thumb-${uuid()}${path.extname(thumbnail.name)}`);
         }
 
         if (video) {
             if (video.size > videoSizeBytes) return next(new HttpError("Video too big", 413));
-            videoPath = await uploadToR2(video, "mern");
+            videoPath = await uploadToR2(video.data, `video-${uuid()}${path.extname(video.name)}`);
         }
 
         const newPost = await Post.create({
@@ -74,44 +68,48 @@ const createPost = async (req, res, next) => {
     }
 };
 
-// ==================== GET POSTS ====================
-const getPosts = async (req, res, next) => {
+export const getPosts = async (req, res, next) => {
     try {
-        const posts = await Post.find().sort({ updatedAt: -1 });
+        const query = req.query.q;
+        let filter = {};
+        if (query) {
+            filter = {
+                $or: [
+                    { title: { $regex: query, $options: 'i' } },
+                    { description: { $regex: query, $options: 'i' } }
+                ]
+            };
+        }
+        const posts = await Post.find(filter).populate('creator', 'name avatar').sort({ updatedAt: -1 });
         res.status(200).json(posts);
     } catch (error) {
         return next(new HttpError(error.message || 'Server error', 500));
     }
 };
 
-// ==================== GET SINGLE POST ====================
-const getPost = async (req, res, next) => {
+export const getPost = async (req, res, next) => {
     try {
         const { id } = req.params;
         if (!mongoose.Types.ObjectId.isValid(id)) return next(new HttpError('Invalid Post ID', 404));
-
-        const post = await Post.findById(id);
+        const post = await Post.findById(id).populate('creator', 'name avatar');
         if (!post) return next(new HttpError('Post not found', 404));
-
         res.status(200).json(post);
     } catch (error) {
         return next(new HttpError(error.message || 'Server error', 500));
     }
 };
 
-// ==================== GET POSTS BY CATEGORY ====================
-const getcategoryPosts = async (req, res, next) => {
+export const getcategoryPosts = async (req, res, next) => {
     try {
         const { category } = req.params;
-        const posts = await Post.find({ category }).sort({ createdAt: -1 });
+        const posts = await Post.find({ category }).populate('creator', 'name avatar').sort({ createdAt: -1 });
         res.status(200).json(posts);
     } catch (error) {
         return next(new HttpError(error.message || 'Server error', 500));
     }
 };
 
-// ==================== GET USER POSTS ====================
-const getUserPosts = async (req, res, next) => {
+export const getUserPosts = async (req, res, next) => {
     try {
         const { id } = req.params;
         const posts = await Post.find({ creator: id }).sort({ createdAt: -1 });
@@ -121,17 +119,11 @@ const getUserPosts = async (req, res, next) => {
     }
 };
 
-// ==================== EDIT POST ====================
-const editPost = async (req, res, next) => {
+export const editPost = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { title, category, description } = req.body;
-
-        if (!title || !category || !description || description.length < 11) {
-            return next(new HttpError("Fill in all fields", 422));
-        }
-
-        if (!mongoose.Types.ObjectId.isValid(id)) return next(new HttpError('Invalid Post ID', 404));
+        if (!title || !category || !description || description.length < 11) return next(new HttpError("Fill in all fields", 422));
 
         const oldPost = await Post.findById(id);
         if (!oldPost) return next(new HttpError('Post not found', 404));
@@ -141,86 +133,65 @@ const editPost = async (req, res, next) => {
 
         if (req.files?.thumbnail) {
             const { thumbnail } = req.files;
-            if (thumbnail.size > thumbnailSizeBytes) return next(new HttpError(`Thumbnail too big. Max ${thumbnailSizeMb}`, 413));
-            const ext = path.extname(thumbnail.name);
-            const newFileName = `thumbnail-${uuid()}${ext}`;
-            updateData.thumbnail = await uploadToR2(thumbnail.data, newFileName);
+            updateData.thumbnail = await uploadToR2(thumbnail.data, `thumbnail-${uuid()}${path.extname(thumbnail.name)}`);
         }
 
         if (req.files?.video) {
             const { video } = req.files;
-            if (video.size > videoSizeBytes) return next(new HttpError(`Video too big. Max ${videoSizeMb}`, 413));
-            const ext = path.extname(video.name);
-            const newVideoName = `video-${uuid()}${ext}`;
-            updateData.videoUrl = await uploadToR2(video.data, newVideoName);
+            updateData.videoUrl = await uploadToR2(video.data, `video-${uuid()}${path.extname(video.name)}`);
         }
 
         const updatedPost = await Post.findByIdAndUpdate(id, updateData, { new: true });
         sendSSE('post_updated', updatedPost);
-
         res.status(200).json(updatedPost);
     } catch (error) {
         return next(new HttpError(error.message || 'Failed to edit post', 500));
     }
 };
 
-// ==================== DELETE POST ====================
-const deletePost = async (req, res, next) => {
+export const deletePost = async (req, res, next) => {
     try {
         const { id } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id)) return next(new HttpError('Invalid Post ID', 404));
-
         const post = await Post.findById(id);
         if (!post) return next(new HttpError('Post not found', 404));
         if (req.user.id.toString() !== post.creator.toString()) return next(new HttpError('Unauthorized', 403));
 
         await Post.findByIdAndDelete(id);
-
         const currentUser = await User.findById(req.user.id);
         await User.findByIdAndUpdate(req.user.id, { posts: Math.max(0, (currentUser.posts || 0) - 1) });
 
         sendSSE('post_deleted', { postId: id, userId: req.user.id });
-
-        res.status(200).json({ message: `Post ${id} deleted successfully` });
+        res.status(200).json({ message: `Post deleted` });
     } catch (error) {
-        return next(new HttpError(error.message || 'Failed to delete post', 500));
+        return next(new HttpError(error.message, 500));
     }
 };
 
-// ==================== LIKE POST ====================
-const likePost = async (req, res, next) => {
+export const likePost = async (req, res, next) => {
     try {
         const { id } = req.params;
         const userId = req.user.id;
-
-        if (!mongoose.Types.ObjectId.isValid(id)) return next(new HttpError('Invalid Post ID', 404));
-
         const post = await Post.findById(id);
         if (!post) return next(new HttpError('Post not found', 404));
 
-        if (!Array.isArray(post.likedBy)) post.likedBy = [];
-
         const liked = post.likedBy.some(uid => uid.toString() === userId.toString());
-
         if (liked) {
             post.likedBy = post.likedBy.filter(uid => uid.toString() !== userId.toString());
-            post.likesCount = Math.max(0, (post.likesCount || 1) - 1);
+            post.likesCount = Math.max(0, post.likesCount - 1);
         } else {
             post.likedBy.push(userId);
-            post.likesCount = (post.likesCount || 0) + 1;
+            post.likesCount += 1;
         }
 
         await post.save();
         sendSSE('post_liked', { postId: id, likesCount: post.likesCount });
-
         res.status(200).json({ liked: !liked, likesCount: post.likesCount });
     } catch (error) {
-        return next(new HttpError(error.message || 'Failed to like post', 500));
+        return next(new HttpError(error.message, 500));
     }
 };
 
-// ==================== STREAM POSTS (SSE) ====================
-const streamPosts = (req, res) => {
+export const streamPosts = (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -239,18 +210,4 @@ const streamPosts = (req, res) => {
     }, 30000);
 
     req.on('close', () => { clearInterval(heartbeat); sseClients.delete(res); });
-    res.on('error', () => { clearInterval(heartbeat); sseClients.delete(res); });
-};
-
-export {
-    createPost,
-    getPosts,
-    getPost,
-    getcategoryPosts,
-    getUserPosts,
-    editPost,
-    deletePost,
-    likePost,
-    streamPosts,
-    sendSSE
 };
