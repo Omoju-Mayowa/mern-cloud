@@ -1,75 +1,48 @@
-import React, { useEffect, useContext, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import React, { useContext, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+// Import YOUR custom axios
+import axios from '../axios' 
 import { UserContext } from './components/context/userContext'
 
-const scrollTop = () => {
-  window.scrollTo(0, 0);
-}
-
-const DeletePost = ({ postId, onSuccess }) => {
+const DeletePost = ({ postId }) => {
   const [isDeleting, setIsDeleting] = useState(false)
-  const [error, setError] = useState('')
   const navigate = useNavigate()
   const { currentUser } = useContext(UserContext)
   const token = currentUser?.token
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!token) {
-        useEffect(() => {
-    navigate('/login')
-  }, [])
-    }
-  }, [token, navigate])
+  const handleDelete = async () => {
+    // 1. Confirm before deleting
+    const confirmDelete = window.confirm("Are you sure you want to delete this post?")
+    if(!confirmDelete) return;
 
-  const handleDelete = async (e) => {
-    e.preventDefault()
-    setError('')
-    
-    if (!postId) {
-      setError('Post ID not found')
-      return
-    }
+    if (!token) return navigate('/login')
 
     setIsDeleting(true)
-
     try {
-      await axios.delete(
-        `${import.meta.env.VITE_API_BASE_URL}/posts/${postId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      )
+      // 2. Use the interceptor-ready axios instance
+      await axios.delete(`/posts/${postId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
       
-      // On success, call optional callback or navigate to dashboard
-      if (onSuccess) {
-        onSuccess()
-      } else {
-        navigate('/myposts/' + currentUser.id)
-        scrollTop()
-      }
+      // 3. Navigate straight home or to dashboard
+      navigate('/') 
+      window.scrollTo(0, 0);
     } catch (err) {
       console.error('Delete error:', err)
-      setError(err.response?.data?.message || err.message || 'Failed to delete post')
+      alert(err.response?.data?.message || 'Failed to delete post')
     } finally {
       setIsDeleting(false)
     }
   }
 
   return (
-    <div>
-      {error && <p className='form__error-message'>{error}</p>}
-      <Link
-        onClick={handleDelete}
-        disabled={isDeleting}
-        className='btn sm danger'
-      >
-        {isDeleting ? 'Deleting...' : 'Delete'}
-      </Link>
-    </div>
+    <button 
+      onClick={handleDelete} 
+      className='btn sm danger' 
+      disabled={isDeleting}
+    >
+      {isDeleting ? '...' : 'Delete'}
+    </button>
   )
 }
 
