@@ -3,7 +3,7 @@ import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import { useNavigate, useParams } from 'react-router-dom'
 import { UserContext } from '../components/context/userContext' // Adjust path if needed
-import axios from '../components/axios' // Your custom instance with interceptors
+import axios from './components/axios' // Your custom instance with interceptors
 import Loader from '../components/Loader'
 
 const scrollTop = () => {
