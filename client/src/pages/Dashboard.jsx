@@ -5,6 +5,19 @@ import { UserContext } from './components/context/userContext'
 import Loader from './components/Loader'
 import DeletePost from './DeletePost'
 
+// Smart Resolver for Dashboard Media (Consistency with PostItem)
+const resolveMediaUrl = (path, folder = 'mern') => {
+  const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
+  if (!path || path.includes('placeholder')) {
+      return `${assetsBase}/${folder}/post-placeholder.png`;
+  }
+  if (path.startsWith('http')) return path;
+  
+  // Check if prefix folder is already present in the path
+  const cleanPath = path.startsWith(`${folder}/`) ? path : `${folder}/${path}`;
+  return `${assetsBase}/${cleanPath}`;
+};
+
 const Dashboard = () => {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -51,8 +64,9 @@ const Dashboard = () => {
               <article key={post._id} className='dashboard__post'>
                 <div className="dashboard__post-info">
                   <div className="dashboard__post-thumbnail">
+                     {/* Updated to use resolveMediaUrl for R2 Bucket Support */}
                      <img 
-                       src={`${import.meta.env.VITE_API_ASSETS_URL.replace('/api', '')}/${post.thumbnail}`} 
+                       src={resolveMediaUrl(post.thumbnail)} 
                        alt={post.title} 
                      />
                   </div>
