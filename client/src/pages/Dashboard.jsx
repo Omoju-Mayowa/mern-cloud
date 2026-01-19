@@ -1,8 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import axios from '../components/axios' // Verify this path!
-import { UserContext } from '../components/context/userContext'
-import Loader from '../components/Loader'
+import axios from './components/axios' // Verify this path!
+import { UserContext } from './components/context/userContext'
+import Loader from './components/Loader'
 import DeletePost from './DeletePost'
 
 const Dashboard = () => {
