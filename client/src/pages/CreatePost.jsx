@@ -17,7 +17,7 @@ const CreatePost = () => {
 
   useEffect(() => {
     if (!token) navigate('/login')
-  }, [])
+  }, [token, navigate])
 
   const POST_CATEGORIES = ["Agriculture", "Business", "Education", "Entertainment", "Art", "Investment", "Uncategorized", "Weather"]
 
@@ -52,11 +52,15 @@ const CreatePost = () => {
           </select>
           <textarea placeholder='Description' value={description} onChange={e => setDescription(e.target.value)} rows={10}></textarea>
           
-          <label htmlFor="thumbnail">Thumbnail (Image)</label>
-          <input type="file" id="thumbnail" onChange={e => setThumbnail(e.target.files[0])} accept='image/*' />
-          
-          <label htmlFor="video">Video (Optional)</label>
-          <input type="file" id="video" onChange={e => setVideo(e.target.files[0])} accept='video/*' />
+          <div className="form__control">
+            <label htmlFor="thumbnail">Thumbnail (Image)</label>
+            <input type="file" id="thumbnail" onChange={e => setThumbnail(e.target.files[0])} accept='image/*' />
+          </div>
+
+          <div className="form__control">
+            <label htmlFor="video">Video (Optional)</label>
+            <input type="file" id="video" onChange={e => setVideo(e.target.files[0])} accept='video/*' />
+          </div>
           
           <button type="submit" className='btn primary'>Create Post</button>
         </form>
