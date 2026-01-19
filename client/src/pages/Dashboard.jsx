@@ -50,10 +50,9 @@ const Dashboard = () => {
             {posts.map(post => (
               <article key={post._id} className='dashboard__post'>
                 <div className="dashboard__post-info">
-                  // Inside your Dashboard.jsx map function:
                   <div className="dashboard__post-thumbnail">
                      <img 
-                       src={`${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/uploads/${post.thumbnail}`} 
+                       src={`${import.meta.env.VITE_API_ASSETS_URL.replace('/api', '')}/uploads/${post.thumbnail}`} 
                        alt={post.title} 
                      />
                   </div>
