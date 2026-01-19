@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 // Import YOUR custom axios
-import axios from '../axios' 
+import axios from './components/axios' 
 import { UserContext } from './components/context/userContext'
 
 const DeletePost = ({ postId }) => {
