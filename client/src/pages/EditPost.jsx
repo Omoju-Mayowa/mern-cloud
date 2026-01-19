@@ -3,7 +3,7 @@ import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import { useNavigate, useParams } from 'react-router-dom'
 import { UserContext } from './components/context/userContext'
-import axios from '../axios' // USE YOUR CUSTOM INSTANCE
+import axios from './components/axios' // USE YOUR CUSTOM INSTANCE
 import Loader from './components/Loader'
 
 const EditPost = () => {
