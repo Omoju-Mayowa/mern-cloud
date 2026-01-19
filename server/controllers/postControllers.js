@@ -37,7 +37,7 @@ const uploadToR2 = async (fileBuffer, filename, folder = "mern") => {
     return `${process.env.CLOUDFLARE_R2_ASSETS_URL}/${key}`;
 };
 
-export const createPost = async (req, res, next) => {
+const createPost = async (req, res, next) => {
     try {
         const { title, category, description } = req.body;
         if (!title || !category || !description) return next(new HttpError("Fill in all fields", 422));
