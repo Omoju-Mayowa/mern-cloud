@@ -34,7 +34,7 @@ const UserProfile = () => {
   const isOwnProfile = currentUser?.id === id
 
   // Assets Base URL calculation (Railway URL)
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
+  const baseUrl = import.meta.env.VITE_API_ASSETS_URL || ''
   const assetsBase = baseUrl.replace('/api', '')
 
   // Fetch user data on mount
