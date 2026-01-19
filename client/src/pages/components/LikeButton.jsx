@@ -54,7 +54,7 @@ const LikeButton = ({ postID, initialLikesCount = 0, initialLikedBy = [] }) => {
   return (
     <button
       type="button"
-      className={`btn category ${liked ? 'clicked' : ''}`}
+      className={`btn like ${liked ? 'clicked' : ''}`}
       onClick={handleClick}
       aria-pressed={liked}
       aria-label={liked ? 'Unlike' : 'Like'}
