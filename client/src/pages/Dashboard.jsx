@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import axios from '../components/axios' 
+import axios from './components/axios' // Your custom instance with interceptors
 import { UserContext } from './components/context/userContext'
 import Loader from './components/Loader'
 import DeletePost from './DeletePost' // Make sure this path is correct
