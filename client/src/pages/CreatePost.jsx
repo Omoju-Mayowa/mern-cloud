@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UserContext } from './components/context/userContext'
-import axios from 'axios'
+import axios from '../axios' // Import our custom instance
 
 const CreatePost = () => {
   const [title, setTitle] = useState('')
@@ -19,22 +19,21 @@ const CreatePost = () => {
     if (!token) navigate('/login')
   }, [token, navigate])
 
-  const POST_CATEGORIES = ["Agriculture", "Business", "Education", "Entertainment", "Art", "Investment", "Uncategorized", "Weather"]
-
   const createPost = async (e) => {
     e.preventDefault();
     const postData = new FormData();
-    postData.set('title', title)
-    postData.set('category', category)
-    postData.set('description', description)
-    if (thumbnail) postData.set('thumbnail', thumbnail)
-    if (video) postData.set('video', video)
+    postData.set('title', title);
+    postData.set('category', category);
+    postData.set('description', description);
+    if (thumbnail) postData.set('thumbnail', thumbnail);
+    if (video) postData.set('video', video);
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/posts`, postData, {
+      // No need to include the full base URL, the interceptor has it
+      await axios.post(`/posts`, postData, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      if (response.status === 200) navigate('/')
+      navigate('/')
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create post")
     }
@@ -48,20 +47,13 @@ const CreatePost = () => {
         <form className="form create-post__form" onSubmit={createPost}>
           <input type="text" placeholder='Title' value={title} onChange={e => setTitle(e.target.value)} autoFocus />
           <select name="category" value={category} onChange={e => setCategory(e.target.value)}>
-            {POST_CATEGORIES.map(cat => <option key={cat}>{cat}</option>)}
+            {["Agriculture", "Business", "Education", "Entertainment", "Art", "Investment", "Uncategorized", "Weather"].map(cat => <option key={cat}>{cat}</option>)}
           </select>
           <textarea placeholder='Description' value={description} onChange={e => setDescription(e.target.value)} rows={10}></textarea>
-          
           <div className="form__control">
-            <label htmlFor="thumbnail">Thumbnail (Image)</label>
-            <input type="file" id="thumbnail" onChange={e => setThumbnail(e.target.files[0])} accept='image/*' />
+             <label htmlFor="thumbnail">Thumbnail</label>
+             <input type="file" id="thumbnail" onChange={e => setThumbnail(e.target.files[0])} accept='image/*' />
           </div>
-
-          <div className="form__control">
-            <label htmlFor="video">Video (Optional)</label>
-            <input type="file" id="video" onChange={e => setVideo(e.target.files[0])} accept='video/*' />
-          </div>
-          
           <button type="submit" className='btn primary'>Create Post</button>
         </form>
       </div>
