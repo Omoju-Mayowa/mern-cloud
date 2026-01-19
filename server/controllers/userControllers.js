@@ -62,16 +62,59 @@ export const registerUser = async (req, res, next) => {
 
 export const loginUser = async (req, res, next) => {
     const { email, password } = req.body;
-    try {
-        const user = await User.findOne({ email: email.toLowerCase() });
-        if (!user) return next(new HttpError('Invalid credentials', 401));
-        const matchedIndex = await verifyPasswordWithPeppers(user.password, prehashPassword(password), user.pepperVersion);
-        if (matchedIndex === null) return next(new HttpError('Invalid credentials', 401));
 
-        const token = jwt.sign({ id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: '6h' });
-        res.status(200).json({ token, id: user._id, name: user.name });
+    // 1. Basic validation
+    if (!email || !password) {
+        return next(new HttpError("Please fill in all fields.", 422));
+    }
+
+    try {
+        // 2. Find user
+        const user = await User.findOne({ email: email.toLowerCase() });
+        
+        // Safety: If no user found, return early
+        if (!user) {
+            return next(new HttpError('Invalid credentials', 401));
+        }
+
+        // 3. Verify Password
+        // Wrapping this in a try/catch or checking the result strictly
+        let matchedIndex;
+        try {
+            matchedIndex = await verifyPasswordWithPeppers(
+                user.password, 
+                prehashPassword(password), 
+                user.pepperVersion
+            );
+        } catch (pwError) {
+            console.error("Password verification system error:", pwError);
+            return next(new HttpError('Authentication service error', 500));
+        }
+
+        // 4. Check if password matched
+        // Using null check strictly
+        if (matchedIndex === null || matchedIndex === undefined) {
+            return next(new HttpError('Invalid credentials', 401));
+        }
+
+        // 5. Generate Token
+        const token = jwt.sign(
+            { id: user._id, name: user.name }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '6h' }
+        );
+
+        // 6. Success Response
+        res.status(200).json({ 
+            token, 
+            id: user._id, 
+            name: user.name,
+            avatar: user.avatar // Good to include for frontend state
+        });
+
     } catch (error) {
-        return next(new HttpError('Login failed', 500));
+        console.error("Login Controller Error:", error);
+        return next(new HttpError('Login failed. Please try again later.', 500));
     }
 };
 
