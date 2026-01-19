@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 // CRITICAL: Import your CUSTOM axios instance, not the default one
-import axios from '../components/axios' 
+import axios from './components/axios' 
 import { UserContext } from './components/context/userContext'
 import Loader from './components/Loader'
 
