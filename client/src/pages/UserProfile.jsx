@@ -11,6 +11,19 @@ const scrollTop = () => {
   window.scrollTo(0, 0);
 }
 
+// Logic mirrored from PostItem for consistent image handling
+const resolveMediaUrl = (path, folder = 'mern') => {
+  const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
+  if (!path || path.includes('placeholder')) {
+      return `${assetsBase}/${folder}/post-placeholder.png`;
+  }
+  if (path.startsWith('http')) return path;
+  
+  // Check if prefix folder is already present in the path
+  const cleanPath = path.startsWith(`${folder}/`) ? path : `${folder}/${path}`;
+  return `${assetsBase}/${cleanPath}`;
+};
+
 const UserProfile = () => {
   const { id } = useParams()
   const [userData, setUserData] = useState(null)
@@ -52,11 +65,9 @@ const UserProfile = () => {
           confirmNewPassword: ''
         })
         
-        if (response.data.avatar) {
-          setAvatar(`${assetsBase}/${response.data.avatar}`)
-        } else {
-          setAvatar(`${assetsBase}/avatar-default.png`)
-        }
+        // Use resolveMediaUrl for initial avatar load
+        setAvatar(resolveMediaUrl(response.data.avatar));
+        
         setError('')
       } catch (err) {
         console.error('Error fetching user:', err)
@@ -66,7 +77,7 @@ const UserProfile = () => {
       }
     }
     fetchUserData()
-  }, [id, assetsBase])
+  }, [id])
 
   // Real-time updates via SSE
   usePostStream((event, payload) => {
@@ -78,7 +89,7 @@ const UserProfile = () => {
         email: payload.email || prev.email
       }))
       if (payload.avatar) {
-        setAvatar(`${assetsBase}/uploads/${payload.avatar}`)
+        setAvatar(resolveMediaUrl(payload.avatar))
       }
     }
   })
@@ -130,7 +141,7 @@ const UserProfile = () => {
       
       setUserData(response.data)
       if (response.data.avatar) {
-        setAvatar(`${assetsBase}/uploads/${response.data.avatar}`)
+        setAvatar(resolveMediaUrl(response.data.avatar))
       }
 
       setIsEditing(false)
@@ -200,13 +211,13 @@ const UserProfile = () => {
           </div>
         </div>
         
-        <UserPosts userId={id} assetsBase={assetsBase} />
+        <UserPosts userId={id} />
       </div>
     </section>
   )
 }
 
-const UserPosts = ({ userId, assetsBase }) => {
+const UserPosts = ({ userId }) => {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -235,11 +246,14 @@ const UserPosts = ({ userId, assetsBase }) => {
             key={post._id}
             postID={post._id}
             thumbnail={post.thumbnail}
+            videoUrl={post.videoUrl}
             category={post.category}
             title={post.title}
             description={post.description}
             authorID={post.creator}
             createdAt={post.createdAt}
+            likesCount={post.likesCount}
+            likedBy={post.likedBy}
           />
         ))}
       </div>
