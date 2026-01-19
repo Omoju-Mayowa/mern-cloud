@@ -51,13 +51,13 @@ const PostDetail = () => {
         <div className="container post-detail__container">
           <div className="post-detail__header">
             {/* Flex container to align LikeButton and Author */}
-            <div className="post-detail__meta" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <div className="post-detail__meta" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
+              <PostAuthor authorID={post.creator} createdAt={post.createdAt} />
               <LikeButton 
                 postID={post._id} 
                 initialLikesCount={post.likesCount} 
                 initialLikedBy={post.likedBy} 
               />
-              <PostAuthor authorID={post.creator} createdAt={post.createdAt} />
             </div>
 
             {currentUser?.id === post.creator && (
