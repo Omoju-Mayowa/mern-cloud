@@ -75,7 +75,7 @@ const PostItem = ({ postID, category, title, description, authorID, thumbnail, v
           <PostAuthor authorID={authorID} createdAt={createdAt} />
           <div className="post__footer-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <LikeButton postID={postID} initialLikesCount={likesCount} initialLikedBy={likedBy} />
-            <Link className='btn category' onClick={scrollTop} to={`/posts/categories/${category}`}>{category}</Link>
+            <Link className='btn category' onClick={scrollTop} to={`/posts/categories/${category}`}>{category?.length > 10 ? `${category.substring(0, 10)}...` : category}</Link>
           </div>
         </div>
       </div>
