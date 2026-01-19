@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UserContext } from './components/context/userContext'
-import axios from '../axios' // Import our custom instance
+import axios from '../components/axios' // Import our custom instance
 
 const CreatePost = () => {
   const [title, setTitle] = useState('')
