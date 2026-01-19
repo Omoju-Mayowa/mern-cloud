@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import axios from './axios' // Adjusted path to your custom axios
+import axios from './components/axios' // Your custom instance with interceptors
 import { UserContext } from './components/context/userContext'
 
 const DeletePost = ({ postId }) => {
