@@ -52,7 +52,7 @@ const Dashboard = () => {
                 <div className="dashboard__post-info">
                   <div className="dashboard__post-thumbnail">
                      <img 
-                       src={`${import.meta.env.VITE_API_ASSETS_URL.replace('/api', '')}/uploads/${post.thumbnail}`} 
+                       src={`${import.meta.env.VITE_API_ASSETS_URL.replace('/api', '')}/${post.thumbnail}`} 
                        alt={post.title} 
                      />
                   </div>
