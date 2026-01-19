@@ -3,7 +3,7 @@ import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import { useNavigate } from 'react-router-dom'
 import { UserContext } from './components/context/userContext'
-import axios from '../components/axios' // USE YOUR CUSTOM INSTANCE FOR AUTO-LOGOUT
+import axios from './components/axios' // USE YOUR CUSTOM INSTANCE FOR AUTO-LOGOUT
 
 const scrollTop = () => {
   window.scrollTo(0, 0);
