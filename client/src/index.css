@@ -428,6 +428,7 @@ footer {
 
 .post__author-avatar {
   width: 3.5rem;
+  border: 1px solid var(--color-primary);
   display: flex;
   aspect-ratio: 1/1;
   border-radius: var(--radius-4);
