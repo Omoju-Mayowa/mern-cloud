@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-    baseURL: 'https://your-railway-url.app/api', // Replace with your URL
+    baseURL: import.meta.env.VITE_API_BASE_URL, // Replace with your URL
 });
 
 // The "Security Guard"
