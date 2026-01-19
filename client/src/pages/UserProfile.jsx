@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import axios from '../axios' // Import our custom instance
+import axios from '../components/axios' // Import our custom instance
 import { UserContext } from './components/context/userContext'
 // ... icons and components
 
