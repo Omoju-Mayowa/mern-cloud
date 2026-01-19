@@ -438,6 +438,10 @@ footer {
   corner-shape: squircle;
 }
 
+.post__author-avatr img {
+  border-radius: var(--radius-4);
+}
+
 .post__author-details {
   margin-top: -1rem;
 }
