@@ -101,7 +101,7 @@ const UserProfile = () => {
             
             {isEditing && (
               <div style={{ marginTop: '1.5rem' }}>
-                <div onClick={() => setIsChangingPassword(!isChangingPassword)} style={{cursor: 'pointer', color: 'blue', marginBottom: '10px'}}>
+                <div className="form proile__form" onClick={() => setIsChangingPassword(!isChangingPassword)} style={{cursor: 'pointer', color: 'blue', marginBottom: '10px'}}>
                   {isChangingPassword ? "Cancel Password Change" : "Change Password?"}
                 </div>
                 {isChangingPassword && (
