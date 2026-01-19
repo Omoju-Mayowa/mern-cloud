@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+// CRITICAL: Import your CUSTOM axios instance, not the default one
+import axios from '../components/axios' 
 import { UserContext } from './components/context/userContext'
 import Loader from './components/Loader'
 
@@ -10,24 +11,27 @@ const Dashboard = () => {
   const navigate = useNavigate()
   const { currentUser } = useContext(UserContext)
 
-  // Configuration for Cloudflare R2
   const assetsBase = import.meta.env.VITE_API_ASSETS_URL || 'https://pub-ec6d8fbb35c24f83a77c02047b5c8f13.r2.dev';
-  
-  // NOTE: Ensure this matches the EXACT file name in your R2 bucket (e.g., .jpg vs .png)
   const defaultThumbnail = `${assetsBase}/mern/post-placeholder.jpg`;
 
   useEffect(() => {
+    // 1. Initial Frontend Check
     if (!currentUser?.token) {
       navigate('/login')
+      return; // Stop execution
     }
 
     const fetchUserPosts = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/posts/users/${currentUser.id}`, {
+        // 2. We use the custom axios. Base URL and Headers are now handled by the interceptor
+        // but we can still pass headers manually if your interceptor isn't using the "Request" trick yet.
+        const response = await axios.get(`/posts/users/${currentUser.id}`, {
           headers: { Authorization: `Bearer ${currentUser.token}` }
         })
         setPosts(response.data)
       } catch (err) {
+        // 3. If this is a 401, the interceptor in ../axios.js will catch it 
+        // and trigger the window.location.href redirect before this console.error runs.
         console.error("Could not fetch posts", err)
       } finally {
         setLoading(false)
@@ -37,17 +41,9 @@ const Dashboard = () => {
     fetchUserPosts()
   }, [currentUser, navigate])
 
-  /**
-   * Smart Resolver for Thumbnails:
-   * 1. If thumbnail is missing, use the default placeholder.
-   * 2. If thumbnail is a full URL (starts with http), use it as is.
-   * 3. If thumbnail is a path, ensure it has the correct 'mern/' prefix.
-   */
   const resolveThumbnail = (thumbnailPath) => {
     if (!thumbnailPath) return defaultThumbnail;
     if (thumbnailPath.startsWith('http')) return thumbnailPath;
-
-    // Check if the path already includes 'mern/' to avoid double-prefixing
     const cleanPath = thumbnailPath.startsWith('mern/') ? thumbnailPath : `mern/${thumbnailPath}`;
     return `${assetsBase}/${cleanPath}`;
   };
@@ -66,12 +62,11 @@ const Dashboard = () => {
                     src={resolveThumbnail(post.thumbnail)} 
                     alt={post.title} 
                     onError={(e) => {
-                      // Prevent infinite loops if the placeholder is also missing
                       e.target.onerror = null; 
                       e.target.src = defaultThumbnail;
                     }}
                   />
-                </div>       
+                </div>        
                 <h5>{post.title}</h5>
               </div>
               <div className="dashboard__post-actions">
