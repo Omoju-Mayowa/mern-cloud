@@ -53,9 +53,9 @@ const UserProfile = () => {
         })
         
         if (response.data.avatar) {
-          setAvatar(`${assetsBase}/uploads/${response.data.avatar}`)
+          setAvatar(`${assetsBase}/avatars/${response.data.avatar}`)
         } else {
-          setAvatar(`${assetsBase}/uploads/avatar-default.png`)
+          setAvatar(`${assetsBase}/avatars/avatar-default.png`)
         }
         setError('')
       } catch (err) {
